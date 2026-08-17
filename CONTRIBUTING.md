@@ -3,7 +3,7 @@
 ## Setup Local
 
 ```bash
-git clone https://github.com/lucasfimiani-cd/FluxoMed.git
+git clone https://github.com/lucasfimiani-cmd/FluxoMed.git
 cd FluxoMed
 npm install
 ```
