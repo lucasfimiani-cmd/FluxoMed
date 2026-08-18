@@ -285,12 +285,26 @@ export const AtividadeSchema = z.object({
 });
 export type Atividade = z.infer<typeof AtividadeSchema>;
 
+// ─── Recebimento Schemas ────────────────────────────────────────────────────
+
+export const CriarRecebimentoSchema = z.object({
+  fonteDeRendaId: z.string().min(1, "Fonte de renda é obrigatória"),
+  valor: z.number().positive("Valor deve ser maior que zero"),
+  data: z
+    .string()
+    .min(1, "Data é obrigatória")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
+  observacao: z.string().max(300, "Observação deve ter no máximo 300 caracteres").optional().nullable(),
+});
+export type CriarRecebimentoInput = z.infer<typeof CriarRecebimentoSchema>;
+
 export const RecebimentoSchema = z.object({
-  id: z.string().uuid(),
-  fonteDeRendaId: z.string().uuid(),
+  id: z.string(),
+  userId: z.string(),
+  fonteDeRendaId: z.string(),
   valor: z.number().min(0),
-  data: z.string().datetime(),
-  descricao: z.string().max(500).optional(),
+  data: z.string(),
+  observacao: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

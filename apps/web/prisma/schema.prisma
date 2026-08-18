@@ -18,6 +18,7 @@ model User {
   perfisFiscais  PerfilFiscal[]
   fontesDeRenda  FonteDeRenda[]
   atividades     Atividade[]
+  recebimentos   Recebimento[]
 }
 
 model Session {
@@ -89,6 +90,7 @@ model FonteDeRenda {
   precos           PrecoAtividade[]
   atividades       Atividade[]
   recorrenciasGeradas RecorrenciaGerada[]
+  recebimentos     Recebimento[]
 }
 
 model PrecoAtividade {
@@ -116,6 +118,7 @@ model Atividade {
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   fonteDeRenda   FonteDeRenda    @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
   recorrenciaGerada RecorrenciaGerada?
+  recebimentos   Recebimento[]
 }
 
 model RecorrenciaGerada {
@@ -130,4 +133,19 @@ model RecorrenciaGerada {
   atividade      Atividade    @relation(fields: [atividadeId], references: [id], onDelete: Cascade)
 
   @@unique([fonteDeRendaId, ano, mes])
+}
+
+model Recebimento {
+  id             String      @id @default(cuid())
+  userId         String
+  fonteDeRendaId String
+  data           DateTime
+  valor          Float
+  observacao     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fonteDeRenda   FonteDeRenda @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
+  atividades     Atividade[]
 }

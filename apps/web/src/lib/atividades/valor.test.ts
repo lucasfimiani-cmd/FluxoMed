@@ -135,6 +135,25 @@ describe("podeEditar", () => {
     expect(result.permitido).toBe(false);
     expect(result.mensagem).toBe("Atividade cancelada não pode ser editada");
   });
+
+  it("deve bloquear edição de REALIZADA com recebimento vinculado", () => {
+    const result = podeEditar({
+      status: "REALIZADA",
+      recebimentos: [{ id: "r1" }],
+    });
+    expect(result.permitido).toBe(false);
+    expect(result.mensagem).toBe(
+      "Atividade vinculada a um recebimento — desvincule antes de editar"
+    );
+  });
+
+  it("deve permitir edição de REALIZADA sem recebimento vinculado", () => {
+    const result = podeEditar({
+      status: "REALIZADA",
+      recebimentos: [],
+    });
+    expect(result.permitido).toBe(true);
+  });
 });
 
 import { CriarAtividadeSchema, EditarAtividadeSchema } from "@fluxomed/shared";

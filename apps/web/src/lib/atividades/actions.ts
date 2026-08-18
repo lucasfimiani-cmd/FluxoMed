@@ -86,14 +86,18 @@ export async function editarAtividade(formData: FormData) {
   // Buscar atividade existente
   const atividade = await prisma.atividade.findUnique({
     where: { id },
+    include: { recebimentos: { select: { id: true } } },
   });
 
   if (!atividade || atividade.userId !== user.id) {
     return redirect("/app/atividades");
   }
 
-  // Verificar se pode editar (não cancelada)
-  const pode = podeEditar({ status: atividade.status });
+  // Verificar se pode editar
+  const pode = podeEditar({
+    status: atividade.status,
+    recebimentos: atividade.recebimentos,
+  });
   if (!pode.permitido) {
     const msg = encodeURIComponent(pode.mensagem ?? "Atividade não pode ser editada");
     return redirect(`/app/atividades?error=${msg}`);
@@ -171,10 +175,18 @@ export async function realizarAtividade(formData: FormData) {
 
   const atividade = await prisma.atividade.findUnique({
     where: { id },
+    include: { recebimentos: { select: { id: true } } },
   });
 
   if (!atividade || atividade.userId !== user.id) {
     return redirect("/app/atividades");
+  }
+
+  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+    const msg = encodeURIComponent(
+      "Atividade vinculada a um recebimento — desvincule antes de realizar"
+    );
+    return redirect(`/app/atividades?error=${msg}`);
   }
 
   if (atividade.status !== "AGENDADA") {
@@ -201,10 +213,18 @@ export async function cancelarAtividade(formData: FormData) {
 
   const atividade = await prisma.atividade.findUnique({
     where: { id },
+    include: { recebimentos: { select: { id: true } } },
   });
 
   if (!atividade || atividade.userId !== user.id) {
     return redirect("/app/atividades");
+  }
+
+  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+    const msg = encodeURIComponent(
+      "Atividade vinculada a um recebimento — desvincule antes de cancelar"
+    );
+    return redirect(`/app/atividades?error=${msg}`);
   }
 
   if (atividade.status === "CANCELADA") {

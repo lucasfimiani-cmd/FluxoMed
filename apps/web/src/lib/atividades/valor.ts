@@ -57,10 +57,12 @@ export type FonteComPrecos = Parameters<typeof calcularValorAtividade>[0];
 
 /**
  * Verifica se uma atividade pode ser editada.
- * Bloqueia edição de atividades CANCELADAS.
- * O bloqueio por vinculação a Recebimento será aplicado no #33.
+ * Bloqueia edição de atividades CANCELADAS ou vinculadas a um Recebimento.
  */
-export function podeEditar(atividade: { status: string }): {
+export function podeEditar(atividade: {
+  status: string;
+  recebimentos?: { id: string }[];
+}): {
   permitido: boolean;
   mensagem?: string;
 } {
@@ -71,13 +73,13 @@ export function podeEditar(atividade: { status: string }): {
     };
   }
 
-  // Ponto de extensão para #33: adicionar verificação de recebimentoId
-  // if (atividade.recebimentoId) {
-  //   return {
-  //     permitido: false,
-  //     mensagem: "Atividade vinculada a um recebimento não pode ser editada",
-  //   };
-  // }
+  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+    return {
+      permitido: false,
+      mensagem:
+        "Atividade vinculada a um recebimento — desvincule antes de editar",
+    };
+  }
 
   return { permitido: true };
 }
