@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { criarFonteDeRenda } from "@/lib/fontes/actions";
+import { FonteConditionalFields } from "@/components/FonteConditionalFields";
 
 export default async function NovaFontePage(props: {
   searchParams?: Promise<{ error?: string }>;
@@ -19,7 +20,7 @@ export default async function NovaFontePage(props: {
 
   if (perfis.length === 0) {
     return (
-      <AppShell>
+      <AppShell currentPath="/app/fontes">
         <h1 className="mb-6 text-2xl font-bold">Nova Fonte de Renda</h1>
         <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
           Você precisa cadastrar um{" "}
@@ -33,7 +34,7 @@ export default async function NovaFontePage(props: {
   }
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/fontes">
       <h1 className="mb-6 text-2xl font-bold">Nova Fonte de Renda</h1>
 
       {searchParams?.error && (
@@ -70,10 +71,7 @@ function FonteForm({
       </div>
 
       <div>
-        <label
-          htmlFor="perfilFiscalId"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="perfilFiscalId" className="mb-1 block text-sm font-medium">
           Perfil Fiscal
         </label>
         <select
@@ -92,97 +90,10 @@ function FonteForm({
         </select>
       </div>
 
-      <div>
-        <label htmlFor="modelo" className="mb-1 block text-sm font-medium">
-          Modelo de Remuneração
-        </label>
-        <select
-          id="modelo"
-          name="modelo"
-          required
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          <option value="">Selecione...</option>
-          <option value="FIXO_MENSAL">Fixo Mensal</option>
-          <option value="POR_ATIVIDADE">Por Atividade</option>
-          <option value="POR_UNIDADE">Por Unidade (tabela de preços)</option>
-        </select>
-      </div>
-
-      <div id="campo-valor-mensal">
-        <label htmlFor="valorMensal" className="mb-1 block text-sm font-medium">
-          Valor Mensal (R$)
-        </label>
-        <p className="mb-1 text-xs text-zinc-400">
-          Apenas para modelo Fixo Mensal.
-        </p>
-        <input
-          id="valorMensal"
-          name="valorMensal"
-          type="number"
-          step="0.01"
-          min="0"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder="Ex.: 5000.00"
-        />
-      </div>
-
-      <div id="campo-valor-atividade">
-        <label
-          htmlFor="valorPorAtividade"
-          className="mb-1 block text-sm font-medium"
-        >
-          Valor por Atividade (R$)
-        </label>
-        <p className="mb-1 text-xs text-zinc-400">
-          Apenas para modelo Por Atividade.
-        </p>
-        <input
-          id="valorPorAtividade"
-          name="valorPorAtividade"
-          type="number"
-          step="0.01"
-          min="0"
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder="Ex.: 350.00"
-        />
-      </div>
-
-      <div id="campo-precos">
-        <label className="mb-1 block text-sm font-medium">
-          Tabela de Preços por Tipo de Atividade
-        </label>
-        <p className="mb-1 text-xs text-zinc-400">
-          Apenas para modelo Por Unidade. Preencha pelo menos um tipo.
-        </p>
-        <div className="space-y-2">
-          {[
-            { tipo: "PLANTAO", label: "Plantão" },
-            { tipo: "CONSULTA", label: "Consulta" },
-            { tipo: "PROCEDIMENTO", label: "Procedimento" },
-            { tipo: "OUTRO", label: "Outro" },
-          ].map(({ tipo, label }) => (
-            <div key={tipo} className="flex items-center gap-2">
-              <span className="w-28 text-sm text-zinc-600">{label}</span>
-              <input
-                id={`preco_${tipo}`}
-                name={`preco_${tipo}`}
-                type="number"
-                step="0.01"
-                min="0"
-                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                placeholder="Valor (R$)"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <FonteConditionalFields />
 
       <div>
-        <label
-          htmlFor="prazoPagamentoDias"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="prazoPagamentoDias" className="mb-1 block text-sm font-medium">
           Prazo de Pagamento (dias)
         </label>
         <input

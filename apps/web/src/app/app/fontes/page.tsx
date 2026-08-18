@@ -29,33 +29,44 @@ export default async function FontesPage() {
   });
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/fontes">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Fontes de Renda</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Fontes de Renda</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            {fontes.length} fonte{fontes.length !== 1 ? "s" : ""} cadastrada{fontes.length !== 1 ? "s" : ""}
+          </p>
+        </div>
         <Link
           href="/app/fontes/novo"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
         >
           Nova Fonte
         </Link>
       </div>
 
       {fontes.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
-          Nenhuma fonte de renda cadastrada.
+        <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-zinc-400">Nenhuma fonte de renda cadastrada.</p>
+          <Link
+            href="/app/fontes/novo"
+            className="mt-3 inline-block text-sm font-medium text-brand-600 hover:text-brand-700"
+          >
+            Criar primeira fonte
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
           {fontes.map((fonte) => (
             <div
               key={fonte.id}
-              className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4"
+              className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">{fonte.nome}</p>
+                  <p className="font-medium text-zinc-800">{fonte.nome}</p>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       fonte.ativa
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-zinc-100 text-zinc-500"
@@ -64,7 +75,7 @@ export default async function FontesPage() {
                     {fonte.ativa ? "Ativa" : "Inativa"}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-500">
+                <p className="mt-0.5 text-sm text-zinc-500">
                   {rotuloTipo[fonte.perfilFiscal.tipo] ??
                     fonte.perfilFiscal.tipo}{" "}
                   &middot; {rotuloModelo[fonte.modelo] ?? fonte.modelo} &middot;{" "}
@@ -76,14 +87,11 @@ export default async function FontesPage() {
               <div className="flex gap-2">
                 <Link
                   href={`/app/fontes/${fonte.id}/editar`}
-                  className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm hover:bg-zinc-200"
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50"
                 >
                   Editar
                 </Link>
-                <ToggleAtivaForm
-                  id={fonte.id}
-                  ativa={fonte.ativa}
-                />
+                <ToggleAtivaForm id={fonte.id} ativa={fonte.ativa} />
               </div>
             </div>
           ))}
@@ -99,10 +107,10 @@ function ToggleAtivaForm({ id, ativa }: { id: string; ativa: boolean }) {
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"
-        className={`rounded-lg px-3 py-1.5 text-sm ${
+        className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
           ativa
-            ? "bg-red-50 text-red-600 hover:bg-red-100"
-            : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+            ? "border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+            : "border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
         }`}
       >
         {ativa ? "Desativar" : "Reativar"}

@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { PerfilConditionalFields } from "@/components/PerfilConditionalFields";
 
 export default function NovoPerfilPage() {
   return (
-    <AppShell>
+    <AppShell currentPath="/app/perfis">
       <h1 className="mb-6 text-2xl font-bold">Novo Perfil Fiscal</h1>
       <PerfilForm />
     </AppShell>
@@ -34,7 +35,6 @@ async function criarAction(formData: FormData) {
     );
   }
 
-  // Arredondar para 2 casas
   const aliquota = Math.round(parsed.data.aliquotaEfetiva * 100) / 100;
 
   await prisma.perfilFiscal.create({
@@ -52,42 +52,10 @@ async function criarAction(formData: FormData) {
 function PerfilForm() {
   return (
     <form action={criarAction} className="max-w-md space-y-4">
+      <PerfilConditionalFields />
+
       <div>
-        <label htmlFor="tipo" className="mb-1 block text-sm font-medium">
-          Tipo
-        </label>
-        <select
-          id="tipo"
-          name="tipo"
-          required
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          <option value="">Selecione...</option>
-          <option value="PF">Pessoa Física (PF)</option>
-          <option value="PJ">Pessoa Jurídica (PJ)</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="regime" className="mb-1 block text-sm font-medium">
-          Regime Tributário
-        </label>
-        <select
-          id="regime"
-          name="regime"
-          required
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          <option value="">Selecione...</option>
-          <option value="PF_AUTONOMO">PF Autônoma</option>
-          <option value="SIMPLES_NACIONAL">Simples Nacional</option>
-          <option value="LUCRO_PRESUMIDO">Lucro Presumido</option>
-        </select>
-      </div>
-      <div>
-        <label
-          htmlFor="aliquotaEfetiva"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="aliquotaEfetiva" className="mb-1 block text-sm font-medium">
           Alíquota Efetiva (%)
         </label>
         <input

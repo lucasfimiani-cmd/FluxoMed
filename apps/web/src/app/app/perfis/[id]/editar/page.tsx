@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { PerfilConditionalFields } from "@/components/PerfilConditionalFields";
 
 export default async function EditarPerfilPage({
   params,
@@ -19,7 +20,7 @@ export default async function EditarPerfilPage({
   if (!perfil || perfil.userId !== user.id) notFound();
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/perfis">
       <h1 className="mb-6 text-2xl font-bold">Editar Perfil Fiscal</h1>
       <PerfilForm perfil={perfil} />
     </AppShell>
@@ -75,42 +76,12 @@ function PerfilForm({
   return (
     <form action={editarAction} className="max-w-md space-y-4">
       <input type="hidden" name="id" value={perfil.id} />
+      <PerfilConditionalFields
+        initialTipo={perfil.tipo}
+        initialRegime={perfil.regime}
+      />
       <div>
-        <label htmlFor="tipo" className="mb-1 block text-sm font-medium">
-          Tipo
-        </label>
-        <select
-          id="tipo"
-          name="tipo"
-          required
-          defaultValue={perfil.tipo}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          <option value="PF">Pessoa Física (PF)</option>
-          <option value="PJ">Pessoa Jurídica (PJ)</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="regime" className="mb-1 block text-sm font-medium">
-          Regime Tributário
-        </label>
-        <select
-          id="regime"
-          name="regime"
-          required
-          defaultValue={perfil.regime}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-        >
-          <option value="PF_AUTONOMO">PF Autônoma</option>
-          <option value="SIMPLES_NACIONAL">Simples Nacional</option>
-          <option value="LUCRO_PRESUMIDO">Lucro Presumido</option>
-        </select>
-      </div>
-      <div>
-        <label
-          htmlFor="aliquotaEfetiva"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="aliquotaEfetiva" className="mb-1 block text-sm font-medium">
           Alíquota Efetiva (%)
         </label>
         <input

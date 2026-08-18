@@ -26,7 +26,7 @@ export default async function NovaAtividadePage(props: {
   const hoje = new Date().toISOString().split("T")[0];
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/atividades">
       <h1 className="mb-6 text-2xl font-bold">Nova Atividade</h1>
 
       {searchParams?.error && (
@@ -36,12 +36,14 @@ export default async function NovaAtividadePage(props: {
       )}
 
       {fontes.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
-          Você precisa ter uma{" "}
-          <Link href="/app/fontes/novo" className="text-emerald-600 underline">
-            Fonte de Renda
-          </Link>{" "}
-          ativa para registrar uma atividade.
+        <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-zinc-400">
+            Você precisa ter uma{" "}
+            <Link href="/app/fontes/novo" className="text-emerald-600 underline">
+              Fonte de Renda
+            </Link>{" "}
+            ativa para registrar uma atividade.
+          </p>
         </div>
       ) : (
         <AtividadeForm fontes={fontes} hoje={hoje} />
@@ -78,10 +80,7 @@ function AtividadeForm({
       </div>
 
       <div>
-        <label
-          htmlFor="fonteDeRendaId"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="fonteDeRendaId" className="mb-1 block text-sm font-medium">
           Fonte de Renda
         </label>
         <select

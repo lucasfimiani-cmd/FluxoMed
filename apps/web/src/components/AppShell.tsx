@@ -2,10 +2,20 @@ import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
+const NAV_ITEMS = [
+  { href: "/app", label: "Dashboard" },
+  { href: "/app/perfis", label: "Perfis Fiscais" },
+  { href: "/app/fontes", label: "Fontes de Renda" },
+  { href: "/app/atividades", label: "Atividades" },
+  { href: "/app/recebimentos", label: "Recebimentos" },
+] as const;
+
 export default async function AppShell({
   children,
+  currentPath,
 }: {
   children: React.ReactNode;
+  currentPath?: string;
 }) {
   const user = await getSessionUser();
 
@@ -13,59 +23,94 @@ export default async function AppShell({
     redirect("/login");
   }
 
+  const activePath = currentPath ?? "/app";
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6">
-      <header className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/app" className="text-xl font-bold text-emerald-700">
-            FluxoMed
-          </Link>
-          <nav className="flex gap-4 text-sm">
+    <div className="min-h-screen bg-zinc-50">
+      {/* Top bar */}
+      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          {/* Logo + Nav */}
+          <div className="flex items-center gap-8">
             <Link
               href="/app"
-              className="text-zinc-500 hover:text-zinc-900"
+              className="flex items-center gap-2 text-lg font-bold tracking-tight text-brand-700"
             >
-              Dashboard
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
+                F
+              </span>
+              FluxoMed
             </Link>
-            <Link
-              href="/app/perfis"
-              className="text-zinc-500 hover:text-zinc-900"
-            >
-              Perfis Fiscais
-            </Link>
-            <Link
-              href="/app/fontes"
-              className="text-zinc-500 hover:text-zinc-900"
-            >
-              Fontes de Renda
-            </Link>
-            <Link
-              href="/app/atividades"
-              className="text-zinc-500 hover:text-zinc-900"
-            >
-              Atividades
-            </Link>
-            <Link
-              href="/app/recebimentos"
-              className="text-zinc-500 hover:text-zinc-900"
-            >
-              Recebimentos
-            </Link>
-          </nav>
+            <nav className="hidden items-center gap-1 sm:flex">
+              {NAV_ITEMS.map((item) => {
+                const isActive =
+                  item.href === "/app"
+                    ? activePath === "/app"
+                    : activePath.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-brand-50 text-brand-700"
+                        : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* User area */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                {user.name.charAt(0).toUpperCase()}
+              </span>
+              <span className="hidden text-sm text-zinc-500 sm:block">
+                {user.name}
+              </span>
+            </div>
+            <form action="/logout" method="POST">
+              <button
+                type="submit"
+                className="rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700"
+              >
+                Sair
+              </button>
+            </form>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-400">{user.name}</span>
-          <form action="/logout" method="POST">
-            <button
-              type="submit"
-              className="rounded-lg bg-zinc-200 px-3 py-1.5 text-sm font-medium hover:bg-zinc-300"
-            >
-              Sair
-            </button>
-          </form>
-        </div>
+
+        {/* Mobile nav */}
+        <nav className="flex gap-1 border-t border-zinc-100 px-4 py-2 sm:hidden">
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              item.href === "/app"
+                ? activePath === "/app"
+                : activePath.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                  isActive
+                    ? "bg-brand-50 text-brand-700"
+                    : "text-zinc-500 hover:bg-zinc-100"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
       </header>
-      <main>{children}</main>
+
+      {/* Content */}
+      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
     </div>
   );
 }

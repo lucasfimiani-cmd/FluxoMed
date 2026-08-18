@@ -80,7 +80,8 @@ test.describe("Dashboard financeiro", () => {
 
     // Realizar
     const card30d = page
-      .locator("div.rounded-lg:has(p:has-text('Clínica Dashboard 30d'))")
+      .locator(".space-y-3 > div")
+      .filter({ hasText: "Clínica Dashboard 30d" })
       .filter({ hasText: "Agendada" })
       .first();
     await card30d.locator("text=Realizar").click();
@@ -104,7 +105,8 @@ test.describe("Dashboard financeiro", () => {
 
     // Realizar
     const card0d = page
-      .locator("div.rounded-lg:has(p:has-text('Clínica Dashboard 0d'))")
+      .locator(".space-y-3 > div")
+      .filter({ hasText: "Clínica Dashboard 0d" })
       .filter({ hasText: "Agendada" })
       .first();
     await card0d.locator("text=Realizar").click();

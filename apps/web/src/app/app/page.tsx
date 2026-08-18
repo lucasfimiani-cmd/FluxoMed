@@ -98,44 +98,122 @@ export default async function DashboardPage({
   const corProducao = meta ? faixaCor(pctProducao) : "vermelho";
   const corCaixa = meta ? faixaCor(pctCaixa) : "vermelho";
 
+  const corBarra = (cor: string) => {
+    switch (cor) {
+      case "verde": return "bg-emerald-500";
+      case "amarelo": return "bg-amber-400";
+      default: return "bg-red-500";
+    }
+  };
+
+  const corTexto = (cor: string) => {
+    switch (cor) {
+      case "verde": return "text-emerald-600";
+      case "amarelo": return "text-amber-600";
+      default: return "text-red-600";
+    }
+  };
+
   return (
-    <AppShell>
-      <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
+    <AppShell currentPath="/app">
+      {/* Page header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Dashboard</h1>
+        <p className="mt-1 text-sm text-zinc-500">Resumo financeiro do mês</p>
+      </div>
+
+      {/* Summary cards */}
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Recebido no mês
+          </p>
+          <p className="mt-2 text-2xl font-bold text-brand-600">
+            {formatarMoeda(valorRealizado)}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Projetado no mês
+          </p>
+          <p className="mt-2 text-2xl font-bold text-blue-600">
+            {formatarMoeda(valorProjetado)}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            Líquido estimado
+          </p>
+          <p className="mt-2 text-2xl font-bold text-violet-600">
+            {formatarMoeda(valorLiquido)}
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Projeção simples, sem cálculo fiscal
+          </p>
+        </div>
+      </div>
+
+      {/* Month navigation */}
+      <div className="mb-6 flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3 shadow-sm">
+        <Link
+          href={`/app?mes=${mesAnterior(mes)}`}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700"
+          aria-label="Mês anterior"
+        >
+          ‹
+        </Link>
+        <span className="text-base font-semibold text-zinc-800">{nomeMes(mes)}</span>
+        <Link
+          href={`/app?mes=${mesSeguinte(mes)}`}
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-700"
+          aria-label="Mês seguinte"
+        >
+          ›
+        </Link>
+      </div>
 
       {/* Meta do Mês */}
-      <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-4">
-        <h2 className="mb-3 text-lg font-semibold">Meta do Mês</h2>
+      <div className="mb-8 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-base font-semibold text-zinc-800">Meta do Mês</h2>
 
         {!meta ? (
-          <form action={criarMeta}>
+          <form action={criarMeta} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="ano" value={ano} />
             <input type="hidden" name="mes" value={mesNum} />
-            <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-zinc-500">
+                Valor alvo
+              </label>
               <input
                 type="number"
                 name="valorAlvo"
                 step="0.01"
                 min="0.01"
                 required
-                placeholder="Valor alvo"
-                className="w-40 rounded border border-zinc-300 px-3 py-1.5 text-sm"
+                placeholder="Ex.: 10000.00"
+                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
-              <button
-                type="submit"
-                className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
-              >
-                Definir meta
-              </button>
             </div>
+            <button
+              type="submit"
+              className="rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+            >
+              Definir meta
+            </button>
             {error && (
-              <p className="mt-2 text-sm text-red-600">{error}</p>
+              <p className="w-full text-sm text-red-600">{error}</p>
             )}
           </form>
         ) : (
           <div>
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm text-zinc-500">
-                Valor alvo: {formatarMoeda(meta.valorAlvo)}
+                Valor alvo:{" "}
+                <span className="font-semibold text-zinc-800">
+                  {formatarMoeda(meta.valorAlvo)}
+                </span>
               </span>
               <form action={editarMeta} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={meta.id} />
@@ -146,11 +224,11 @@ export default async function DashboardPage({
                   min="0.01"
                   required
                   defaultValue={meta.valorAlvo}
-                  className="w-32 rounded border border-zinc-300 px-3 py-1 text-sm"
+                  className="w-28 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                 />
                 <button
                   type="submit"
-                  className="rounded bg-zinc-100 px-3 py-1 text-xs font-medium hover:bg-zinc-200"
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
                 >
                   Editar
                 </button>
@@ -158,41 +236,35 @@ export default async function DashboardPage({
             </div>
 
             {/* Produção do mês */}
-            <div className="mb-3">
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="text-zinc-600">Produção do mês</span>
-                <span className="font-medium">{formatarMoeda(valorProducao)}</span>
+            <div className="mb-4">
+              <div className="mb-1.5 flex items-center justify-between text-sm">
+                <span className="font-medium text-zinc-600">Produção do mês</span>
+                <span className="font-semibold text-zinc-800">{formatarMoeda(valorProducao)}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+              <div className="overflow-hidden rounded-full bg-zinc-200">
                 <div
-                  className={`h-full rounded-full transition-all ${classeBarraProgresso(corProducao)}`}
+                  className={`h-2.5 rounded-full transition-all ${corBarra(corProducao)}`}
                   style={{ width: `${Math.min(pctProducao, 100)}%` }}
                 />
               </div>
-              <p className={`mt-1 text-xs font-medium ${
-                corProducao === "verde" ? "text-emerald-600" :
-                corProducao === "amarelo" ? "text-amber-600" : "text-red-600"
-              }`}>
+              <p className={`mt-1 text-xs font-medium ${corTexto(corProducao)}`}>
                 {pctProducao}% — {textoFaltam(valorProducao, meta.valorAlvo)}
               </p>
             </div>
 
             {/* Caixa recebido */}
             <div>
-              <div className="mb-1 flex items-center justify-between text-sm">
-                <span className="text-zinc-600">Caixa recebido</span>
-                <span className="font-medium">{formatarMoeda(valorRealizado)}</span>
+              <div className="mb-1.5 flex items-center justify-between text-sm">
+                <span className="font-medium text-zinc-600">Caixa recebido</span>
+                <span className="font-semibold text-zinc-800">{formatarMoeda(valorRealizado)}</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+              <div className="overflow-hidden rounded-full bg-zinc-200">
                 <div
-                  className={`h-full rounded-full transition-all ${classeBarraProgresso(corCaixa)}`}
+                  className={`h-2.5 rounded-full transition-all ${corBarra(corCaixa)}`}
                   style={{ width: `${Math.min(pctCaixa, 100)}%` }}
                 />
               </div>
-              <p className={`mt-1 text-xs font-medium ${
-                corCaixa === "verde" ? "text-emerald-600" :
-                corCaixa === "amarelo" ? "text-amber-600" : "text-red-600"
-              }`}>
+              <p className={`mt-1 text-xs font-medium ${corTexto(corCaixa)}`}>
                 {pctCaixa}% — {textoFaltam(valorRealizado, meta.valorAlvo)}
               </p>
             </div>
@@ -200,65 +272,21 @@ export default async function DashboardPage({
         )}
       </div>
 
-      {/* Navegação de meses */}
-      <div className="mb-6 flex items-center justify-between">
-        <Link
-          href={`/app?mes=${mesAnterior(mes)}`}
-          className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium hover:bg-zinc-200"
-        >
-          ‹
-        </Link>
-        <span className="text-xl font-bold">{nomeMes(mes)}</span>
-        <Link
-          href={`/app?mes=${mesSeguinte(mes)}`}
-          className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium hover:bg-zinc-200"
-        >
-          ›
-        </Link>
-      </div>
-
-      {/* Cards */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
-          <p className="text-sm text-zinc-500">Recebido no mês</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-600">
-            {formatarMoeda(valorRealizado)}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
-          <p className="text-sm text-zinc-500">Projetado no mês</p>
-          <p className="mt-1 text-2xl font-bold text-blue-600">
-            {formatarMoeda(valorProjetado)}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
-          <p className="text-sm text-zinc-500">Líquido estimado</p>
-          <p className="mt-1 text-2xl font-bold text-violet-600">
-            {formatarMoeda(valorLiquido)}
-          </p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Projeção simples, sem cálculo fiscal (ADR-0006)
-          </p>
-        </div>
-      </div>
-
       {/* Contas a Receber */}
-      <div className="rounded-lg border border-zinc-200 bg-white p-6">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Contas a Receber</h2>
-          <span className="text-lg font-bold text-emerald-600">
+          <h2 className="text-base font-semibold text-zinc-800">Contas a Receber</h2>
+          <span className="text-lg font-bold text-brand-600">
             {formatarMoeda(totalContasAReceber)}
           </span>
         </div>
 
         {fontesAReceber.length === 0 ? (
-          <p className="text-sm text-zinc-400">
+          <p className="py-4 text-center text-sm text-zinc-400">
             Nenhuma conta a receber no momento.
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {fontesAReceber.map((fonte) => {
               const atrasada =
                 fonte.atividades.some(
@@ -270,18 +298,18 @@ export default async function DashboardPage({
               return (
                 <div
                   key={fonte.fonteId}
-                  className="rounded-lg border border-zinc-100 bg-zinc-50 p-3"
+                  className="rounded-lg border border-zinc-100 bg-zinc-50 p-4"
                 >
-                  <div className="mb-2 flex items-center justify-between">
+                  <div className="mb-1.5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{fonte.fonteNome}</span>
+                      <span className="font-medium text-zinc-800">{fonte.fonteNome}</span>
                       {atrasada && (
-                        <span className="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
                           Atrasada
                         </span>
                       )}
                     </div>
-                    <span className="font-semibold">
+                    <span className="font-semibold text-zinc-800">
                       {formatarMoeda(fonte.total)}
                     </span>
                   </div>
