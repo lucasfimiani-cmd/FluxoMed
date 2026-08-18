@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { CriarAtividadeSchema, EditarAtividadeSchema } from "@fluxomed/shared";
+import { TipoAtividade } from "@prisma/client";
 import { calcularValorAtividade, podeEditar } from "./valor";
 
 export async function criarAtividade(formData: FormData) {
@@ -65,7 +66,7 @@ export async function criarAtividade(formData: FormData) {
     data: {
       userId: user.id,
       fonteDeRendaId: data.fonteDeRendaId,
-      tipo: data.tipo as any,
+      tipo: data.tipo as TipoAtividade,
       data: new Date(data.data + "T12:00:00"),
       status: "AGENDADA",
       valor,
@@ -151,7 +152,7 @@ export async function editarAtividade(formData: FormData) {
   await prisma.atividade.update({
     where: { id },
     data: {
-      tipo: data.tipo as any,
+      tipo: data.tipo as TipoAtividade,
       fonteDeRendaId: data.fonteDeRendaId,
       data: new Date(data.data + "T12:00:00"),
       valor,
