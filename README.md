@@ -8,10 +8,10 @@ FluxoMed transforma o caos de múltiplas fontes de renda (plantões, consultas, 
 
 | Camada | Tecnologia |
 |---|---|
-| Mobile | React Native (Expo) |
-| Backend | NestJS + Prisma ORM |
-| Banco | PostgreSQL (Supabase) |
-| Autenticação | Supabase Auth |
+| Web | Next.js (fullstack) |
+| Banco | SQLite (Prisma ORM) |
+| Autenticação | Local (email + senha) |
+| Implantação | Docker + Caddy (VM única, instância por cliente) |
 | Estrutura | Monorepo (npm workspaces) |
 
 ## Estrutura do Projeto
@@ -19,10 +19,10 @@ FluxoMed transforma o caos de múltiplas fontes de renda (plantões, consultas, 
 ```
 fluxomed/
 ├── apps/
-│   ├── api/          # Backend NestJS
-│   └── mobile/       # App React Native (Expo)
+│   └── web/          # Aplicação Next.js (fullstack)
 ├── packages/
 │   └── shared/       # Tipos e contratos compartilhados
+├── deploy/           # Caddy + compose por instância + backup
 ├── package.json      # Workspace root
 └── ...
 ```
@@ -49,23 +49,17 @@ fluxomed/
 ## Como Rodar
 
 ```bash
-# Clone
-git clone https://github.com/lucasfimiani-cmd/FluxoMed.git
-cd FluxoMed
+# Build da imagem
+docker build -t fluxomed-web:v1 .
 
-# Instalar dependências
-npm install
+# Provisionar uma instância (um compose por cliente + entrada no Caddyfile)
+# Ex.: cliente1.fluxomed.com → container fluxomed-web com volume SQLite próprio
 
-# Setup do banco (copie .env.example)
-cp apps/api/.env.example apps/api/.env
-npx prisma migrate dev
-
-# Rodar backend
-npm run dev -w apps/api
-
-# Rodar mobile
-npm run dev -w apps/mobile
+# Backup diário por instância
+sqlite3 /data/cliente1/fluxomed.db ".backup '/backups/cliente1-$(date +%F).db'"
 ```
+
+Veja a topologia completa em [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## Licença
 

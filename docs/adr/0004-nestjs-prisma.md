@@ -1,3 +1,7 @@
+---
+Status: superseded by ADR-0010
+---
+
 # NestJS + Prisma no backend
 
 **Contexto:** Backend TypeScript com ORM maduro.

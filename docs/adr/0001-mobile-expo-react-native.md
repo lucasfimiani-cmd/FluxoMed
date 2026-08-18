@@ -1,3 +1,7 @@
+---
+Status: superseded by ADR-0008
+---
+
 # Mobile nativo com Expo/React Native
 
 **Contexto:** O app precisa de registro rápido de atividades no dia a dia (plantões dentro de hospitais) e um dashboard financeiro.
