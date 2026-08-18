@@ -132,6 +132,15 @@ export async function desvincularAtividade(formData: FormData) {
     return redirect("/app/recebimentos");
   }
 
+  // Validar que a atividade existe e pertence ao usuário
+  const atividade = await prisma.atividade.findUnique({
+    where: { id: atividadeId },
+  });
+
+  if (!atividade || atividade.userId !== user.id) {
+    return redirect("/app/recebimentos");
+  }
+
   await prisma.atividade.update({
     where: { id: atividadeId },
     data: {
