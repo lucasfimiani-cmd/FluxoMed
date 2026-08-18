@@ -6,11 +6,13 @@ import Link from "next/link";
 import { realizarAtividade, cancelarAtividade } from "@/lib/atividades/actions";
 import { rotuloTipoAtividade } from "@/lib/atividades/valor";
 import { garantirAtividadesRecorrentes } from "@/lib/atividades/recorrencia";
+import { statusEfetivo } from "@/lib/recebimentos/status";
 
 const rotuloStatus: Record<string, { label: string; cor: string }> = {
   AGENDADA: { label: "Agendada", cor: "bg-amber-100 text-amber-700" },
   REALIZADA: { label: "Realizada", cor: "bg-emerald-100 text-emerald-700" },
   CANCELADA: { label: "Cancelada", cor: "bg-red-100 text-red-700" },
+  RECEBIDA: { label: "Recebida", cor: "bg-blue-100 text-blue-700" },
 };
 
 function formatarValor(valor: number): string {
@@ -75,6 +77,7 @@ export default async function AtividadesPage(props: {
     },
     include: {
       fonteDeRenda: { select: { id: true, nome: true, modelo: true } },
+      recebimentos: { select: { id: true } },
     },
     orderBy: { data: "desc" },
   });
@@ -125,7 +128,8 @@ export default async function AtividadesPage(props: {
       ) : (
         <div className="space-y-3">
           {atividades.map((atividade) => {
-            const statusInfo = rotuloStatus[atividade.status] ?? {
+            const statusAtual = statusEfetivo(atividade);
+            const statusInfo = rotuloStatus[statusAtual] ?? {
               label: atividade.status,
               cor: "bg-zinc-100 text-zinc-600",
             };
