@@ -5,7 +5,7 @@ Plataforma de gestão financeira para profissionais da saúde: registra atividad
 ## Language
 
 **Profissional**:
-O usuário do FluxoMed — um profissional da saúde que administra suas próprias finanças.
+O usuário do FluxoMed — um profissional da saúde que administra suas próprias finanças. No MVP há um único Profissional por instância (ADR-0014).
 _Avoid_: usuário, médico, cliente
 
 **Perfil Fiscal**:
