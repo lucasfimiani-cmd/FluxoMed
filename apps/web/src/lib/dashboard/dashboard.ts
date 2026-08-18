@@ -84,7 +84,7 @@ export async function contasAReceberPorFonte(userId: string) {
     if (atividades.length === 0) continue;
 
     const total = atividades.reduce(
-      (acc: number, a: any) => acc + a.valor,
+      (acc, a) => acc + a.valor,
       0
     );
 
@@ -92,7 +92,7 @@ export async function contasAReceberPorFonte(userId: string) {
       fonteId: fonte.id,
       fonteNome: fonte.nome,
       prazoPagamentoDias: fonte.prazoPagamentoDias,
-      atividades: atividades.map((a: any) => ({
+      atividades: atividades.map((a) => ({
         id: a.id,
         valor: a.valor,
         data: a.data,

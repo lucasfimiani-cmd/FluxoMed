@@ -26,13 +26,26 @@ export function formatarAjuste(ajuste: number): string {
 }
 
 /**
- * Retorna atividades REALIZADA de uma dada fonte que NÃO estão vinculadas a nenhum recebimento.
+ * Shape de uma atividade a receber retornada por contasAReceberDaFonte.
  */
-export async function contasAReceberDaFonte(
-  prisma: any,
+export interface AtividadeAReceber {
+  id: string;
+  tipo: string;
+  valor: number;
+  data: Date;
+}
+
+/**
+ * Retorna atividades REALIZADA de uma dada fonte que NÃO estão vinculadas a nenhum recebimento.
+ * Aceita o PrismaClient real ou um mock com atividade.findMany.
+ */
+export async function contasAReceberDaFonte<T extends {
+  atividade: { findMany: (...args: any[]) => Promise<any> };
+}>(
+  prisma: T,
   fonteDeRendaId: string,
   userId: string
-): Promise<any[]> {
+): Promise<AtividadeAReceber[]> {
   return prisma.atividade.findMany({
     where: {
       userId,
@@ -41,5 +54,5 @@ export async function contasAReceberDaFonte(
       recebimentos: { none: {} },
     },
     orderBy: { data: "asc" },
-  });
+  }) as Promise<AtividadeAReceber[]>;
 }

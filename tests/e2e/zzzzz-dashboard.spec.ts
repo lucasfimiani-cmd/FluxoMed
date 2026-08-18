@@ -130,6 +130,14 @@ test.describe("Dashboard financeiro", () => {
     await expect(page.locator("text=Projetado no mês")).toBeVisible();
     await expect(page.locator("text=Líquido estimado")).toBeVisible();
 
+    // Assert card values
+    // Recebido: R$ 3.000,00 (recebimento criado na fonte 30d)
+    await expect(page.locator("text=R$ 3.000,00").first()).toBeVisible();
+
+    // Projetado: R$ 2.000,00 (atividade REALIZADA da fonte 0d com prazo 0 cai no mês;
+    // atividade REALIZADA da fonte 30d com prazo 30 cai no mês seguinte)
+    await expect(page.locator("text=R$ 2.000,00")).toBeVisible();
+
     // Assert Contas a Receber section
     await expect(page.locator("text=Contas a Receber")).toBeVisible();
 
@@ -140,6 +148,9 @@ test.describe("Dashboard financeiro", () => {
     // Clínica Dashboard 30d (prazo 30) — atividade REALIZADA sem vínculo
     // should appear in contas a receber
     await expect(page.locator("text=Clínica Dashboard 30d")).toBeVisible();
+
+    // Total Contas a Receber: R$ 3.000,00 (R$ 2.000 + R$ 1.000)
+    await expect(page.locator("text=R$ 3.000,00")).toBeVisible();
 
     // Month navigation should work
     await expect(page.locator("text=‹")).toBeVisible();

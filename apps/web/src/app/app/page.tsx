@@ -145,10 +145,6 @@ export default async function DashboardPage({
         ) : (
           <div className="space-y-4">
             {fontesAReceber.map((fonte) => {
-              const dataLimite = new Date(
-                hojeDate.getTime() +
-                  fonte.prazoPagamentoDias * 24 * 60 * 60 * 1000
-              );
               const atrasada =
                 fonte.atividades.some(
                   (a) =>
