@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { CriarFonteDeRendaSchema } from "@fluxomed/shared";
-import { Prisma } from "@prisma/client";
+import { Prisma, ModeloRemuneracao, TipoAtividade } from "@prisma/client";
 
 export async function criarFonteDeRenda(formData: FormData) {
   const user = await getSessionUser();
@@ -50,7 +50,7 @@ export async function criarFonteDeRenda(formData: FormData) {
       userId: user.id,
       perfilFiscalId: data.perfilFiscalId,
       nome: data.nome,
-      modelo: data.modelo as any,
+      modelo: data.modelo as ModeloRemuneracao,
       valorMensal: data.valorMensal ?? null,
       valorPorAtividade: data.valorPorAtividade ?? null,
       prazoPagamentoDias: data.prazoPagamentoDias,
@@ -61,7 +61,7 @@ export async function criarFonteDeRenda(formData: FormData) {
                 data: data.precos
                   .filter((p) => p.valor > 0)
                   .map((p) => ({
-                    tipo: p.tipo as any,
+                    tipo: p.tipo as TipoAtividade,
                     valor: p.valor,
                   })),
               },
@@ -131,7 +131,7 @@ export async function editarFonteDeRenda(formData: FormData) {
       data: {
         perfilFiscalId: data.perfilFiscalId,
         nome: data.nome,
-        modelo: data.modelo as any,
+        modelo: data.modelo as ModeloRemuneracao,
         valorMensal: data.valorMensal ?? null,
         valorPorAtividade: data.valorPorAtividade ?? null,
         prazoPagamentoDias: data.prazoPagamentoDias,
@@ -149,7 +149,7 @@ export async function editarFonteDeRenda(formData: FormData) {
           .filter((p) => p.valor > 0)
           .map((p) => ({
             fonteDeRendaId: id,
-            tipo: p.tipo as any,
+            tipo: p.tipo as TipoAtividade,
             valor: p.valor,
           })),
       });
