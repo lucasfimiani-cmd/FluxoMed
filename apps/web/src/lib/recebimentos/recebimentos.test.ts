@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { calcularAjuste, formatarAjuste, contasAReceberDaFonte } from "./ajuste";
 import { statusEfetivo, estaVinculada } from "./status";
 import { CriarRecebimentoSchema } from "@fluxomed/shared";
+import type { PrismaClient } from "@prisma/client";
 
 describe("calcularAjuste", () => {
   it("deve retornar zero quando valor = soma das atividades", () => {
@@ -160,8 +161,8 @@ describe("CriarRecebimentoSchema", () => {
 describe("contasAReceberDaFonte", () => {
   it("deve retornar atividades REALIZADA sem recebimento da fonte correta", async () => {
     const mockAtividades = [
-      { id: "a1", status: "REALIZADA", fonteDeRendaId: "fonte1" },
-      { id: "a2", status: "REALIZADA", fonteDeRendaId: "fonte1" },
+      { id: "a1", status: "REALIZADA", fonteDeRendaId: "fonte1", tipo: "CONSULTA", valor: 300, data: new Date("2026-08-10T12:00:00") },
+      { id: "a2", status: "REALIZADA", fonteDeRendaId: "fonte1", tipo: "PLANTAO", valor: 500, data: new Date("2026-08-15T12:00:00") },
     ];
     const mockPrisma = {
       atividade: {
@@ -169,7 +170,7 @@ describe("contasAReceberDaFonte", () => {
       },
     };
 
-    const result = await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+    const result = await contasAReceberDaFonte(mockPrisma as unknown as PrismaClient, "fonte1", "user1");
 
     expect(mockPrisma.atividade.findMany).toHaveBeenCalledWith({
       where: {
@@ -180,7 +181,10 @@ describe("contasAReceberDaFonte", () => {
       },
       orderBy: { data: "asc" },
     });
-    expect(result).toEqual(mockAtividades);
+    expect(result).toEqual([
+      { id: "a1", tipo: "CONSULTA", valor: 300, data: new Date("2026-08-10T12:00:00") },
+      { id: "a2", tipo: "PLANTAO", valor: 500, data: new Date("2026-08-15T12:00:00") },
+    ]);
   });
 
   it("deve excluir atividades AGENDADA", async () => {
@@ -190,7 +194,7 @@ describe("contasAReceberDaFonte", () => {
       },
     };
 
-    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+    await contasAReceberDaFonte(mockPrisma as unknown as PrismaClient, "fonte1", "user1");
 
     const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
     expect(callArgs.where.status).toBe("REALIZADA");
@@ -203,7 +207,7 @@ describe("contasAReceberDaFonte", () => {
       },
     };
 
-    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+    await contasAReceberDaFonte(mockPrisma as unknown as PrismaClient, "fonte1", "user1");
 
     const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
     expect(callArgs.where.status).toBe("REALIZADA");
@@ -216,7 +220,7 @@ describe("contasAReceberDaFonte", () => {
       },
     };
 
-    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+    await contasAReceberDaFonte(mockPrisma as unknown as PrismaClient, "fonte1", "user1");
 
     const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
     expect(callArgs.where.recebimentos).toEqual({ none: {} });
@@ -229,7 +233,7 @@ describe("contasAReceberDaFonte", () => {
       },
     };
 
-    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+    await contasAReceberDaFonte(mockPrisma as unknown as PrismaClient, "fonte1", "user1");
 
     const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
     expect(callArgs.where.fonteDeRendaId).toBe("fonte1");

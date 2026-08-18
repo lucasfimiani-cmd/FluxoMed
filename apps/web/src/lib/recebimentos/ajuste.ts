@@ -1,3 +1,5 @@
+import type { PrismaClient } from "@prisma/client";
+
 /**
  * Calcula o ajuste de um recebimento: valor do recebimento − soma das atividades vinculadas.
  * Pode ser positivo (sobra), negativo (desconto) ou zero.
@@ -26,14 +28,24 @@ export function formatarAjuste(ajuste: number): string {
 }
 
 /**
+ * Shape de uma atividade a receber retornada por contasAReceberDaFonte.
+ */
+export interface AtividadeAReceber {
+  id: string;
+  tipo: string;
+  valor: number;
+  data: Date;
+}
+
+/**
  * Retorna atividades REALIZADA de uma dada fonte que NÃO estão vinculadas a nenhum recebimento.
  */
 export async function contasAReceberDaFonte(
-  prisma: any,
+  prisma: PrismaClient,
   fonteDeRendaId: string,
   userId: string
-): Promise<any[]> {
-  return prisma.atividade.findMany({
+): Promise<AtividadeAReceber[]> {
+  const atividades = await prisma.atividade.findMany({
     where: {
       userId,
       fonteDeRendaId,
@@ -42,4 +54,11 @@ export async function contasAReceberDaFonte(
     },
     orderBy: { data: "asc" },
   });
+
+  return atividades.map((a) => ({
+    id: a.id,
+    tipo: a.tipo,
+    valor: a.valor,
+    data: a.data,
+  }));
 }

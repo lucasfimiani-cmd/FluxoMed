@@ -168,7 +168,7 @@ export default async function DetalheRecebimentoPage(props: {
         </div>
       ) : (
         <div className="space-y-2">
-          {contasAReceber.map((atv: { id: string; tipo: string; valor: number; data: Date }) => (
+          {contasAReceber.map((atv) => (
             <div
               key={atv.id}
               className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-3"
