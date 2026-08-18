@@ -3,14 +3,63 @@ import { z } from "zod";
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 export const RegimeTributario = z.enum([
+  "PF_AUTONOMO",
   "SIMPLES_NACIONAL",
   "LUCRO_PRESUMIDO",
-  "PF_AUTONOMA",
 ]);
 export type RegimeTributario = z.infer<typeof RegimeTributario>;
 
 export const TipoPerfilFiscal = z.enum(["PF", "PJ"]);
 export type TipoPerfilFiscal = z.infer<typeof TipoPerfilFiscal>;
+
+// ─── Perfil Fiscal Schemas ───────────────────────────────────────────────────
+
+const regimePermitidoParaTipo: Record<string, string[]> = {
+  PF: ["PF_AUTONOMO"],
+  PJ: ["SIMPLES_NACIONAL", "LUCRO_PRESUMIDO"],
+};
+
+export const CriarPerfilFiscalSchema = z
+  .object({
+    tipo: TipoPerfilFiscal,
+    regime: RegimeTributario,
+    aliquotaEfetiva: z
+      .number()
+      .min(0, "Alíquota deve ser no mínimo 0%")
+      .max(100, "Alíquota deve ser no máximo 100%"),
+  })
+  .refine(
+    (data) => regimePermitidoParaTipo[data.tipo]?.includes(data.regime),
+    {
+      message: "Regime tributário incompatível com o tipo de perfil fiscal",
+      path: ["regime"],
+    }
+  );
+export type CriarPerfilFiscalInput = z.infer<typeof CriarPerfilFiscalSchema>;
+
+export const EditarPerfilFiscalSchema = z
+  .object({
+    tipo: TipoPerfilFiscal.optional(),
+    regime: RegimeTributario.optional(),
+    aliquotaEfetiva: z
+      .number()
+      .min(0, "Alíquota deve ser no mínimo 0%")
+      .max(100, "Alíquota deve ser no máximo 100%")
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.tipo && data.regime) {
+        return regimePermitidoParaTipo[data.tipo]?.includes(data.regime);
+      }
+      return true;
+    },
+    {
+      message: "Regime tributário incompatível com o tipo de perfil fiscal",
+      path: ["regime"],
+    }
+  );
+export type EditarPerfilFiscalInput = z.infer<typeof EditarPerfilFiscalSchema>;
 
 export const TipoRemuneracao = z.enum([
   "FIXO_MENSAL",
@@ -29,10 +78,10 @@ export type StatusAtividade = z.infer<typeof StatusAtividade>;
 // ─── Schemas ─────────────────────────────────────────────────────────────────
 
 export const PerfilFiscalSchema = z.object({
-  id: z.string().uuid(),
-  profissionalId: z.string().uuid(),
+  id: z.string(),
+  userId: z.string(),
   tipo: TipoPerfilFiscal,
-  regimeTributario: RegimeTributario,
+  regime: RegimeTributario,
   aliquotaEfetiva: z.number().min(0).max(100),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

@@ -18,7 +18,7 @@ export default defineConfig({
   webServer: {
     command: `npm run dev -w apps/web`,
     url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 30000,
     env: {
       DATABASE_URL: `file:${tmpDbPath}`,

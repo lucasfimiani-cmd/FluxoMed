@@ -5,7 +5,11 @@ import {
   createSessionToken,
   hashToken,
 } from "../auth";
-import { RegisterSchema, LoginSchema } from "@fluxomed/shared";
+import {
+  RegisterSchema,
+  LoginSchema,
+  CriarPerfilFiscalSchema,
+} from "@fluxomed/shared";
 
 describe("hashPassword / verifyPassword", () => {
   it("should verify correct password", () => {
@@ -114,5 +118,107 @@ describe("LoginSchema validation", () => {
       password: "",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("CriarPerfilFiscalSchema validation", () => {
+  it("should accept PF with PF_AUTONOMO", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PF",
+      regime: "PF_AUTONOMO",
+      aliquotaEfetiva: 27.5,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept PJ with SIMPLES_NACIONAL", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 15.5,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept PJ with LUCRO_PRESUMIDO", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "LUCRO_PRESUMIDO",
+      aliquotaEfetiva: 10,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject PF with SIMPLES_NACIONAL", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PF",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 15,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.errors[0].path).toContain("regime");
+    }
+  });
+
+  it("should reject PF with LUCRO_PRESUMIDO", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PF",
+      regime: "LUCRO_PRESUMIDO",
+      aliquotaEfetiva: 15,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject PJ with PF_AUTONOMO", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "PF_AUTONOMO",
+      aliquotaEfetiva: 15,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject aliquota below 0", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: -1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject aliquota above 100", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 101,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept aliquota at boundaries", () => {
+    const r1 = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 0,
+    });
+    expect(r1.success).toBe(true);
+
+    const r2 = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 100,
+    });
+    expect(r2.success).toBe(true);
+  });
+
+  it("should accept aliquota with 2 decimal places", () => {
+    const result = CriarPerfilFiscalSchema.safeParse({
+      tipo: "PJ",
+      regime: "SIMPLES_NACIONAL",
+      aliquotaEfetiva: 15.27,
+    });
+    expect(result.success).toBe(true);
   });
 });
