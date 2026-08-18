@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { CriarAtividadeSchema, EditarAtividadeSchema } from "@fluxomed/shared";
 import { TipoAtividade } from "@prisma/client";
 import { calcularValorAtividade, podeEditar } from "./valor";
+import { estaVinculada } from "@/lib/recebimentos/status";
 
 export async function criarAtividade(formData: FormData) {
   const user = await getSessionOrRedirect();
@@ -163,7 +164,7 @@ export async function realizarAtividade(formData: FormData) {
     return redirect("/app/atividades");
   }
 
-  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+  if (estaVinculada({ recebimentos: atividade.recebimentos })) {
     const msg = encodeURIComponent(
       "Atividade vinculada a um recebimento — desvincule antes de realizar"
     );
@@ -200,7 +201,7 @@ export async function cancelarAtividade(formData: FormData) {
     return redirect("/app/atividades");
   }
 
-  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+  if (estaVinculada({ recebimentos: atividade.recebimentos })) {
     const msg = encodeURIComponent(
       "Atividade vinculada a um recebimento — desvincule antes de cancelar"
     );
