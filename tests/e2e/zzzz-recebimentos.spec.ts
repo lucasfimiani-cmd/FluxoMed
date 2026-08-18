@@ -68,7 +68,7 @@ test.describe("Recebimentos em lote com reconciliação", () => {
     await page.waitForURL("/app/atividades");
 
     // Realizar it — find the Clínica E2E card that also has Agendada badge
-    const clinicaCard = page.locator("div.rounded-lg:has(p:has-text('Clínica E2E'))").filter({ hasText: "Agendada" }).first();
+    const clinicaCard = page.locator(".space-y-3 > div").filter({ hasText: "Clínica E2E" }).filter({ hasText: "Agendada" }).first();
     await clinicaCard.locator("text=Realizar").click();
     await page.waitForURL("/app/atividades");
 
@@ -81,7 +81,7 @@ test.describe("Recebimentos em lote com reconciliação", () => {
     await page.waitForURL("/app/atividades");
 
     // Realizar it — find the Clínica E2E card that has Agendada badge
-    const clinicaCard2 = page.locator("div.rounded-lg:has(p:has-text('Clínica E2E'))").filter({ hasText: "Agendada" }).first();
+    const clinicaCard2 = page.locator(".space-y-3 > div").filter({ hasText: "Clínica E2E" }).filter({ hasText: "Agendada" }).first();
     await clinicaCard2.locator("text=Realizar").click();
     await page.waitForURL("/app/atividades");
 
@@ -144,7 +144,7 @@ test.describe("Recebimentos em lote com reconciliação", () => {
     await page.goto("/app/atividades");
     await page.waitForLoadState('networkidle');
     // Find a Clínica E2E card — it should now be REALIZADA (not RECEBIDA)
-    const clinicaRealizada = page.locator("div.rounded-lg:has(p:has-text('Clínica E2E'))").filter({ hasText: "Realizada" }).first();
+    const clinicaRealizada = page.locator(".space-y-3 > div").filter({ hasText: "Clínica E2E" }).filter({ hasText: "Realizada" }).first();
     // The card should show "Realizada" badge (not "Recebida")
     await expect(clinicaRealizada.locator("text=Realizada")).toBeVisible();
     await expect(clinicaRealizada.locator("text=Recebida")).not.toBeVisible();

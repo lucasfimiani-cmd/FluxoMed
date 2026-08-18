@@ -97,7 +97,8 @@ test.describe("Meta Financeira Mensal", () => {
 
     // Realizar a atividade
     const cardAtividade = page
-      .locator("div.rounded-lg:has(p:has-text('" + fonteNomeUnico + "'))")
+      .locator(".space-y-3 > div")
+      .filter({ hasText: fonteNomeUnico })
       .filter({ hasText: "Agendada" })
       .first();
     await cardAtividade.locator("text=Realizar").click();
@@ -151,7 +152,8 @@ test.describe("Meta Financeira Mensal", () => {
 
     // Realizar
     const cardAtividade2 = page
-      .locator("div.rounded-lg:has(p:has-text('" + fonteNomeUnico2 + "'))")
+      .locator(".space-y-3 > div")
+      .filter({ hasText: fonteNomeUnico2 })
       .filter({ hasText: "Agendada" })
       .first();
     await cardAtividade2.locator("text=Realizar").click();
