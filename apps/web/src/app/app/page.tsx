@@ -4,10 +4,14 @@ import { redirect } from "next/navigation";
 import { garantirAtividadesRecorrentes } from "@/lib/atividades/recorrencia";
 import {
   realizado,
+  producaoDoMes,
   projetado,
   contasAReceberPorFonte,
   liquidoEstimado,
 } from "@/lib/dashboard/dashboard";
+import { criarMeta, editarMeta } from "@/lib/meta/actions";
+import { percentualProgresso, faixaCor, classeBarraProgresso, textoFaltam } from "@/lib/meta/progresso";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 function formatarMoeda(valor: number): string {
@@ -53,7 +57,7 @@ function hoje(): Date {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mes?: string }>;
+  searchParams: Promise<{ mes?: string; error?: string }>;
 }) {
   const user = await getSessionUser();
   if (!user) redirect("/login");
@@ -63,16 +67,23 @@ export default async function DashboardPage({
   const [anoStr, mesStr] = mes.split("-");
   const ano = parseInt(anoStr, 10);
   const mesNum = parseInt(mesStr, 10);
+  const error = params.error;
 
   // Garantir atividades recorrentes para o mês exibido
   await garantirAtividadesRecorrentes(user.id, ano, mesNum);
 
-  const [valorRealizado, valorProjetado, valorLiquido, fontesAReceber] =
+  const [valorRealizado, valorProjetado, valorLiquido, fontesAReceber, valorProducao, meta] =
     await Promise.all([
       realizado(mes, user.id),
       projetado(mes, user.id),
       liquidoEstimado(mes, user.id),
       contasAReceberPorFonte(user.id),
+      producaoDoMes(mes, user.id),
+      prisma.metaFinanceira.findUnique({
+        where: {
+          userId_ano_mes: { userId: user.id, ano, mes: mesNum },
+        },
+      }),
     ]);
 
   const totalContasAReceber = fontesAReceber.reduce(
@@ -82,9 +93,113 @@ export default async function DashboardPage({
 
   const hojeDate = hoje();
 
+  const pctProducao = meta ? percentualProgresso(valorProducao, meta.valorAlvo) : 0;
+  const pctCaixa = meta ? percentualProgresso(valorRealizado, meta.valorAlvo) : 0;
+  const corProducao = meta ? faixaCor(pctProducao) : "vermelho";
+  const corCaixa = meta ? faixaCor(pctCaixa) : "vermelho";
+
   return (
     <AppShell>
       <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
+
+      {/* Meta do Mês */}
+      <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-4">
+        <h2 className="mb-3 text-lg font-semibold">Meta do Mês</h2>
+
+        {!meta ? (
+          <form action={criarMeta}>
+            <input type="hidden" name="ano" value={ano} />
+            <input type="hidden" name="mes" value={mesNum} />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                name="valorAlvo"
+                step="0.01"
+                min="0.01"
+                required
+                placeholder="Valor alvo"
+                className="w-40 rounded border border-zinc-300 px-3 py-1.5 text-sm"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+              >
+                Definir meta
+              </button>
+            </div>
+            {error && (
+              <p className="mt-2 text-sm text-red-600">{error}</p>
+            )}
+          </form>
+        ) : (
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-sm text-zinc-500">
+                Valor alvo: {formatarMoeda(meta.valorAlvo)}
+              </span>
+              <form action={editarMeta} className="flex items-center gap-2">
+                <input type="hidden" name="id" value={meta.id} />
+                <input
+                  type="number"
+                  name="valorAlvo"
+                  step="0.01"
+                  min="0.01"
+                  required
+                  defaultValue={meta.valorAlvo}
+                  className="w-32 rounded border border-zinc-300 px-3 py-1 text-sm"
+                />
+                <button
+                  type="submit"
+                  className="rounded bg-zinc-100 px-3 py-1 text-xs font-medium hover:bg-zinc-200"
+                >
+                  Editar
+                </button>
+              </form>
+            </div>
+
+            {/* Produção do mês */}
+            <div className="mb-3">
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-zinc-600">Produção do mês</span>
+                <span className="font-medium">{formatarMoeda(valorProducao)}</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+                <div
+                  className={`h-full rounded-full transition-all ${classeBarraProgresso(corProducao)}`}
+                  style={{ width: `${Math.min(pctProducao, 100)}%` }}
+                />
+              </div>
+              <p className={`mt-1 text-xs font-medium ${
+                corProducao === "verde" ? "text-emerald-600" :
+                corProducao === "amarelo" ? "text-amber-600" : "text-red-600"
+              }`}>
+                {pctProducao}% — {textoFaltam(valorProducao, meta.valorAlvo)}
+              </p>
+            </div>
+
+            {/* Caixa recebido */}
+            <div>
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-zinc-600">Caixa recebido</span>
+                <span className="font-medium">{formatarMoeda(valorRealizado)}</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-200">
+                <div
+                  className={`h-full rounded-full transition-all ${classeBarraProgresso(corCaixa)}`}
+                  style={{ width: `${Math.min(pctCaixa, 100)}%` }}
+                />
+              </div>
+              <p className={`mt-1 text-xs font-medium ${
+                corCaixa === "verde" ? "text-emerald-600" :
+                corCaixa === "amarelo" ? "text-amber-600" : "text-red-600"
+              }`}>
+                {pctCaixa}% — {textoFaltam(valorRealizado, meta.valorAlvo)}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Navegação de meses */}
       <div className="mb-6 flex items-center justify-between">
         <Link

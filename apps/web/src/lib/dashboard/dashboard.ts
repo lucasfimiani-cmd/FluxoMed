@@ -29,6 +29,25 @@ export async function realizado(mes: string, userId: string): Promise<number> {
 }
 
 /**
+ * Soma das atividades REALIZADA (qualquer vínculo) no mês.
+ * Usada pela meta mensal — dimensão "produção do mês".
+ */
+export async function producaoDoMes(mes: string, userId: string): Promise<number> {
+  const { inicio, fim } = limitesDoMes(mes);
+
+  const result = await prisma.atividade.aggregate({
+    where: {
+      userId,
+      status: "REALIZADA",
+      data: { gte: inicio, lte: fim },
+    },
+    _sum: { valor: true },
+  });
+
+  return result._sum.valor ?? 0;
+}
+
+/**
  * Soma das atividades AGENDADA/REALIZADA sem vínculo com recebimento
  * cuja data + prazoPagamentoDias da fonte cai no mês alvo.
  */

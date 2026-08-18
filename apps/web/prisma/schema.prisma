@@ -19,6 +19,7 @@ model User {
   fontesDeRenda  FonteDeRenda[]
   atividades     Atividade[]
   recebimentos   Recebimento[]
+  metaFinanceiras MetaFinanceira[]
 }
 
 model Session {
@@ -148,4 +149,18 @@ model Recebimento {
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   fonteDeRenda   FonteDeRenda @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
   atividades     Atividade[]
+}
+
+model MetaFinanceira {
+  id        String   @id @default(cuid())
+  userId    String
+  ano       Int
+  mes       Int
+  valorAlvo Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ano, mes])
 }

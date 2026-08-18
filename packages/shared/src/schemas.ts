@@ -310,10 +310,23 @@ export const RecebimentoSchema = z.object({
 });
 export type Recebimento = z.infer<typeof RecebimentoSchema>;
 
+export const CriarMetaFinanceiraSchema = z.object({
+  ano: z.number().int("Ano deve ser um número inteiro").min(2020, "Ano inválido").max(2100, "Ano inválido"),
+  mes: z.number().int("Mês deve ser um número inteiro").min(1, "Mês inválido").max(12, "Mês inválido"),
+  valorAlvo: z.number().positive("Valor alvo deve ser maior que zero"),
+});
+export type CriarMetaFinanceiraInput = z.infer<typeof CriarMetaFinanceiraSchema>;
+
+export const EditarMetaFinanceiraSchema = z.object({
+  valorAlvo: z.number().positive("Valor alvo deve ser maior que zero"),
+});
+export type EditarMetaFinanceiraInput = z.infer<typeof EditarMetaFinanceiraSchema>;
+
 export const MetaFinanceiraSchema = z.object({
-  id: z.string().uuid(),
-  profissionalId: z.string().uuid(),
-  mes: z.string().regex(/^\d{4}-\d{2}$/),
+  id: z.string(),
+  userId: z.string(),
+  ano: z.number().int(),
+  mes: z.number().int(),
   valorAlvo: z.number().min(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
