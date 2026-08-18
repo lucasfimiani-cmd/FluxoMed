@@ -17,6 +17,7 @@ model User {
   sessions      Session[]
   perfisFiscais  PerfilFiscal[]
   fontesDeRenda  FonteDeRenda[]
+  atividades     Atividade[]
 }
 
 model Session {
@@ -64,6 +65,12 @@ model PerfilFiscal {
   fontesDeRenda   FonteDeRenda[]
 }
 
+enum StatusAtividade {
+  AGENDADA
+  REALIZADA
+  CANCELADA
+}
+
 model FonteDeRenda {
   id                String              @id @default(cuid())
   userId            String
@@ -80,6 +87,7 @@ model FonteDeRenda {
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   perfilFiscal     PerfilFiscal      @relation(fields: [perfilFiscalId], references: [id], onDelete: Restrict)
   precos           PrecoAtividade[]
+  atividades       Atividade[]
 }
 
 model PrecoAtividade {
@@ -91,4 +99,19 @@ model PrecoAtividade {
   fonteDeRenda   FonteDeRenda   @relation(fields: [fonteDeRendaId], references: [id], onDelete: Cascade)
 
   @@unique([fonteDeRendaId, tipo])
+}
+
+model Atividade {
+  id             String          @id @default(cuid())
+  userId         String
+  fonteDeRendaId String
+  tipo           TipoAtividade
+  data           DateTime
+  status         StatusAtividade @default(AGENDADA)
+  valor          Float
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fonteDeRenda   FonteDeRenda    @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
 }

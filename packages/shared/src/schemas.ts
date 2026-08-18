@@ -79,7 +79,6 @@ export type TipoAtividade = z.infer<typeof TipoAtividade>;
 export const StatusAtividade = z.enum([
   "AGENDADA",
   "REALIZADA",
-  "RECEBIDA",
   "CANCELADA",
 ]);
 export type StatusAtividade = z.infer<typeof StatusAtividade>;
@@ -251,15 +250,36 @@ export const FonteDeRendaSchema = z.object({
 });
 export type FonteDeRenda = z.infer<typeof FonteDeRendaSchema>;
 
+// ─── Atividade Schemas ─────────────────────────────────────────────────────────
+
+export const CriarAtividadeSchema = z.object({
+  tipo: TipoAtividade,
+  fonteDeRendaId: z.string().min(1, "Fonte de renda é obrigatória"),
+  data: z
+    .string()
+    .min(1, "Data é obrigatória")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
+});
+export type CriarAtividadeInput = z.infer<typeof CriarAtividadeSchema>;
+
+export const EditarAtividadeSchema = z.object({
+  tipo: TipoAtividade,
+  fonteDeRendaId: z.string().min(1, "Fonte de renda é obrigatória"),
+  data: z
+    .string()
+    .min(1, "Data é obrigatória")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato AAAA-MM-DD"),
+});
+export type EditarAtividadeInput = z.infer<typeof EditarAtividadeSchema>;
+
 export const AtividadeSchema = z.object({
-  id: z.string().uuid(),
-  fonteDeRendaId: z.string().uuid(),
-  descricao: z.string().min(1).max(500),
-  data: z.string().datetime(),
-  valorPrevisto: z.number().min(0),
-  valorRealizado: z.number().min(0).optional(),
+  id: z.string(),
+  userId: z.string(),
+  fonteDeRendaId: z.string(),
+  tipo: TipoAtividade,
+  data: z.string(),
   status: StatusAtividade,
-  recebimentoId: z.string().uuid().optional(),
+  valor: z.number().min(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
