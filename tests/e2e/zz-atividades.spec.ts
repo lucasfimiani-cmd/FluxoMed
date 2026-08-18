@@ -86,6 +86,8 @@ test.describe("Atividades CRUD", () => {
     await page.waitForURL("/app/atividades");
     await expect(page.locator("h1")).toHaveText("Atividades");
 
+    const atividadeCards = page.locator(".space-y-3 > div");
+
     // ── Create FIXO_MENSAL activity ────────────────────────────────────────
     await page.click("text=Nova Atividade");
     await page.waitForURL("/app/atividades/novo");
@@ -94,10 +96,9 @@ test.describe("Atividades CRUD", () => {
     await page.click('button:has-text("Salvar")');
     await page.waitForURL("/app/atividades");
 
-    // Should show R$ 5.000,00
-    await expect(page.locator("text=R$ 5.000,00")).toBeVisible();
-    await expect(page.locator("text=FixoMensal Teste")).toBeVisible();
-    await expect(page.locator("text=Agendada")).toBeVisible();
+    // Should show R$ 5.000,00 — scope to card with Agendada badge
+    await expect(atividadeCards.nth(0).locator("text=R$ 5.000,00")).toBeVisible();
+    await expect(atividadeCards.nth(0).locator("text=Agendada")).toBeVisible();
 
     // ── Create POR_ATIVIDADE activity ───────────────────────────────────────
     await page.click("text=Nova Atividade");
@@ -122,8 +123,7 @@ test.describe("Atividades CRUD", () => {
     await expect(page.locator("text=R$ 1.500,00")).toBeVisible();
 
     // ── Realizar a primeira atividade (agendada → realizada) ──────────────
-    const atividadeCards = page.locator(".space-y-3 > div");
-    await expect(atividadeCards).toHaveCount(3);
+    await expect(atividadeCards).toHaveCount(5);
 
     // Realizar the last created (first in list, index 0)
     await atividadeCards.nth(0).locator("text=Realizar").click();

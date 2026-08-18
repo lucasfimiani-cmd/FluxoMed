@@ -88,6 +88,7 @@ model FonteDeRenda {
   perfilFiscal     PerfilFiscal      @relation(fields: [perfilFiscalId], references: [id], onDelete: Restrict)
   precos           PrecoAtividade[]
   atividades       Atividade[]
+  recorrenciasGeradas RecorrenciaGerada[]
 }
 
 model PrecoAtividade {
@@ -114,4 +115,19 @@ model Atividade {
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   fonteDeRenda   FonteDeRenda    @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
+  recorrenciaGerada RecorrenciaGerada?
+}
+
+model RecorrenciaGerada {
+  id             String    @id @default(cuid())
+  fonteDeRendaId String
+  atividadeId    String    @unique
+  ano            Int
+  mes            Int
+  createdAt      DateTime  @default(now())
+
+  fonteDeRenda   FonteDeRenda @relation(fields: [fonteDeRendaId], references: [id], onDelete: Restrict)
+  atividade      Atividade    @relation(fields: [atividadeId], references: [id], onDelete: Cascade)
+
+  @@unique([fonteDeRendaId, ano, mes])
 }
