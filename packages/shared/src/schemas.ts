@@ -104,7 +104,7 @@ export type PrecoAtividade = z.infer<typeof PrecoAtividadeSchema>;
 
 // ─── Fonte de Renda Schemas ───────────────────────────────────────────────────
 
-const rotuloTipoAtividade: Record<string, string> = {
+export const rotuloTipoAtividade: Record<string, string> = {
   PLANTAO: "Plantão",
   CONSULTA: "Consulta",
   PROCEDIMENTO: "Procedimento",
