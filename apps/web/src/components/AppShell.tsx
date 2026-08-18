@@ -27,6 +27,12 @@ export default async function AppShell({
             >
               Perfis Fiscais
             </Link>
+            <Link
+              href="/app/fontes"
+              className="text-zinc-500 hover:text-zinc-900"
+            >
+              Fontes de Renda
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

@@ -14,8 +14,9 @@ model User {
   passwordHash String
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  sessions     Session[]
-  perfisFiscais PerfilFiscal[]
+  sessions      Session[]
+  perfisFiscais  PerfilFiscal[]
+  fontesDeRenda  FonteDeRenda[]
 }
 
 model Session {
@@ -38,6 +39,19 @@ enum RegimeTributario {
   LUCRO_PRESUMIDO
 }
 
+enum ModeloRemuneracao {
+  FIXO_MENSAL
+  POR_ATIVIDADE
+  POR_UNIDADE
+}
+
+enum TipoAtividade {
+  PLANTAO
+  CONSULTA
+  PROCEDIMENTO
+  OUTRO
+}
+
 model PerfilFiscal {
   id              String            @id @default(cuid())
   userId          String
@@ -47,4 +61,34 @@ model PerfilFiscal {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fontesDeRenda   FonteDeRenda[]
+}
+
+model FonteDeRenda {
+  id                String              @id @default(cuid())
+  userId            String
+  perfilFiscalId    String
+  nome              String
+  modelo            ModeloRemuneracao
+  valorMensal       Float?
+  valorPorAtividade Float?
+  prazoPagamentoDias Int                @default(30)
+  ativa             Boolean             @default(true)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  perfilFiscal     PerfilFiscal      @relation(fields: [perfilFiscalId], references: [id], onDelete: Restrict)
+  precos           PrecoAtividade[]
+}
+
+model PrecoAtividade {
+  id             String         @id @default(cuid())
+  fonteDeRendaId String
+  tipo           TipoAtividade
+  valor          Float
+
+  fonteDeRenda   FonteDeRenda   @relation(fields: [fonteDeRendaId], references: [id], onDelete: Cascade)
+
+  @@unique([fonteDeRendaId, tipo])
 }
