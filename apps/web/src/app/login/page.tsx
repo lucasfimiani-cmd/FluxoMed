@@ -23,7 +23,7 @@ export default async function LoginPage({
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white shadow-lg shadow-brand-200">
             F
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">FluxoMed</h1>
+          <span className="text-xl font-bold tracking-tight text-zinc-900">FluxoMed</span>
           <p className="mt-1 text-sm text-zinc-500">
             Gestão financeira para profissionais da saúde
           </p>
@@ -31,7 +31,7 @@ export default async function LoginPage({
 
         {/* Card */}
         <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-5 text-base font-semibold text-zinc-800">Entrar</h2>
+          <h1 className="mb-5 text-base font-semibold text-zinc-800">Entrar</h1>
 
           {params.error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
