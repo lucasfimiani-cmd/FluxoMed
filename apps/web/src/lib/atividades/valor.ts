@@ -1,9 +1,4 @@
-const rotuloTipoAtividade: Record<string, string> = {
-  PLANTAO: "Plantão",
-  CONSULTA: "Consulta",
-  PROCEDIMENTO: "Procedimento",
-  OUTRO: "Outro",
-};
+import { rotuloTipoAtividade } from "@fluxomed/shared";
 
 /**
  * Calcula o valor de uma atividade com base no modelo de remuneração da fonte.

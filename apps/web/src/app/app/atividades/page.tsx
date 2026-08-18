@@ -167,7 +167,7 @@ export default async function AtividadesPage(props: {
                       <RealizarForm id={atividade.id} />
                     </>
                   )}
-                  {atividade.status !== "CANCELADA" && (
+                  {(statusAtual === "AGENDADA" || statusAtual === "REALIZADA") && (
                     <CancelarForm id={atividade.id} />
                   )}
                 </div>

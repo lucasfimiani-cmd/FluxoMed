@@ -1,16 +1,16 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionOrRedirect, parseFormOrRedirect } from "@/lib/actions/guard";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { CriarAtividadeSchema, EditarAtividadeSchema } from "@fluxomed/shared";
 import { TipoAtividade } from "@prisma/client";
 import { calcularValorAtividade, podeEditar } from "./valor";
+import { estaVinculada } from "@/lib/recebimentos/status";
 
 export async function criarAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const raw = {
     tipo: formData.get("tipo") as string,
@@ -18,15 +18,7 @@ export async function criarAtividade(formData: FormData) {
     data: formData.get("data") as string,
   };
 
-  const parsed = CriarAtividadeSchema.safeParse(raw);
-  if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos";
-    return redirect(
-      `/app/atividades/novo?error=${encodeURIComponent(firstError)}`
-    );
-  }
-
-  const data = parsed.data;
+  const data = parseFormOrRedirect(CriarAtividadeSchema, raw, "/app/atividades/novo");
 
   // Validar fonte: existe, pertence ao usuário e está ativa
   const fonte = await prisma.fonteDeRenda.findUnique({
@@ -78,8 +70,7 @@ export async function criarAtividade(formData: FormData) {
 }
 
 export async function editarAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const id = formData.get("id") as string;
 
@@ -109,15 +100,7 @@ export async function editarAtividade(formData: FormData) {
     data: formData.get("data") as string,
   };
 
-  const parsed = EditarAtividadeSchema.safeParse(raw);
-  if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos";
-    return redirect(
-      `/app/atividades/${id}/editar?error=${encodeURIComponent(firstError)}`
-    );
-  }
-
-  const data = parsed.data;
+  const data = parseFormOrRedirect(EditarAtividadeSchema, raw, `/app/atividades/${id}/editar`);
 
   // Validar fonte
   const fonte = await prisma.fonteDeRenda.findUnique({
@@ -168,8 +151,7 @@ export async function editarAtividade(formData: FormData) {
 }
 
 export async function realizarAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const id = formData.get("id") as string;
 
@@ -182,7 +164,7 @@ export async function realizarAtividade(formData: FormData) {
     return redirect("/app/atividades");
   }
 
-  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+  if (estaVinculada({ recebimentos: atividade.recebimentos })) {
     const msg = encodeURIComponent(
       "Atividade vinculada a um recebimento — desvincule antes de realizar"
     );
@@ -206,8 +188,7 @@ export async function realizarAtividade(formData: FormData) {
 }
 
 export async function cancelarAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const id = formData.get("id") as string;
 
@@ -220,7 +201,7 @@ export async function cancelarAtividade(formData: FormData) {
     return redirect("/app/atividades");
   }
 
-  if (atividade.recebimentos && atividade.recebimentos.length > 0) {
+  if (estaVinculada({ recebimentos: atividade.recebimentos })) {
     const msg = encodeURIComponent(
       "Atividade vinculada a um recebimento — desvincule antes de cancelar"
     );

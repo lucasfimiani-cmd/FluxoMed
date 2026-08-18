@@ -1,14 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionOrRedirect, parseFormOrRedirect } from "@/lib/actions/guard";
 import { redirect } from "next/navigation";
 import { CriarFonteDeRendaSchema } from "@fluxomed/shared";
 import { Prisma, ModeloRemuneracao, TipoAtividade } from "@prisma/client";
 
 export async function criarFonteDeRenda(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const raw = {
     nome: formData.get("nome") as string,
@@ -27,15 +26,7 @@ export async function criarFonteDeRenda(formData: FormData) {
     precos: parsePrecos(formData),
   };
 
-  const parsed = CriarFonteDeRendaSchema.safeParse(raw);
-  if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos";
-    return redirect(
-      `/app/fontes/novo?error=${encodeURIComponent(firstError)}`
-    );
-  }
-
-  const data = parsed.data;
+  const data = parseFormOrRedirect(CriarFonteDeRendaSchema, raw, "/app/fontes/novo");
 
   // Verificar se o perfil pertence ao usuário
   const perfil = await prisma.perfilFiscal.findUnique({
@@ -74,8 +65,7 @@ export async function criarFonteDeRenda(formData: FormData) {
 }
 
 export async function editarFonteDeRenda(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const id = formData.get("id") as string;
 
@@ -104,15 +94,7 @@ export async function editarFonteDeRenda(formData: FormData) {
     precos: parsePrecos(formData),
   };
 
-  const parsed = CriarFonteDeRendaSchema.safeParse(raw);
-  if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos";
-    return redirect(
-      `/app/fontes/${id}/editar?error=${encodeURIComponent(firstError)}`
-    );
-  }
-
-  const data = parsed.data;
+  const data = parseFormOrRedirect(CriarFonteDeRendaSchema, raw, `/app/fontes/${id}/editar`);
 
   // Verificar se o perfil pertence ao usuário
   const perfil = await prisma.perfilFiscal.findUnique({
@@ -160,8 +142,7 @@ export async function editarFonteDeRenda(formData: FormData) {
 }
 
 export async function toggleAtivaFonteDeRenda(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const id = formData.get("id") as string;
 
@@ -179,7 +160,7 @@ export async function toggleAtivaFonteDeRenda(formData: FormData) {
 }
 
 function parsePrecos(formData: FormData) {
-  const tipos = ["PLANTAO", "CONSULTA", "PROCEDIMENTO", "OUTRO"];
+  const tipos = Object.values(TipoAtividade);
   const precos: { tipo: string; valor: number }[] = [];
 
   for (const tipo of tipos) {

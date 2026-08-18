@@ -1,14 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionOrRedirect, parseFormOrRedirect } from "@/lib/actions/guard";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { CriarRecebimentoSchema } from "@fluxomed/shared";
 
 export async function criarRecebimento(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const raw = {
     fonteDeRendaId: formData.get("fonteDeRendaId") as string,
@@ -17,15 +16,7 @@ export async function criarRecebimento(formData: FormData) {
     observacao: (formData.get("observacao") as string) || null,
   };
 
-  const parsed = CriarRecebimentoSchema.safeParse(raw);
-  if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos";
-    return redirect(
-      `/app/recebimentos/novo?error=${encodeURIComponent(firstError)}`
-    );
-  }
-
-  const data = parsed.data;
+  const data = parseFormOrRedirect(CriarRecebimentoSchema, raw, "/app/recebimentos/novo");
 
   // Validar fonte: existe e pertence ao usuário (pode estar inativa)
   const fonte = await prisma.fonteDeRenda.findUnique({
@@ -53,8 +44,7 @@ export async function criarRecebimento(formData: FormData) {
 }
 
 export async function vincularAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const recebimentoId = formData.get("recebimentoId") as string;
   const atividadeId = formData.get("atividadeId") as string;
@@ -95,7 +85,7 @@ export async function vincularAtividade(formData: FormData) {
   }
 
   // Já vinculada a este recebimento
-  if (atividade.recebimentos?.some((r) => r.id === recebimentoId)) {
+  if (atividade.recebimentos?.some((r: { id: string }) => r.id === recebimentoId)) {
     const msg = encodeURIComponent(
       "Atividade já vinculada a este recebimento"
     );
@@ -118,8 +108,7 @@ export async function vincularAtividade(formData: FormData) {
 }
 
 export async function desvincularAtividade(formData: FormData) {
-  const user = await getSessionUser();
-  if (!user) redirect("/login");
+  const user = await getSessionOrRedirect();
 
   const recebimentoId = formData.get("recebimentoId") as string;
   const atividadeId = formData.get("atividadeId") as string;
