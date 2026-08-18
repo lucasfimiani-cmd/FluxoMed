@@ -7,8 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Probe {
-  id        String   @id @default(uuid())
-  hits      Int      @default(0)
-  updatedAt DateTime @updatedAt
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
