@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "FluxoMed",
-  description:
-    "Gestão financeira para profissionais da saúde",
+  description: "Gestão financeira para profissionais da saúde",
 };
 
 export default function RootLayout({
@@ -13,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body className="min-h-screen bg-zinc-50 text-zinc-900 antialiased">
+        {children}
+      </body>
     </html>
   );
 }

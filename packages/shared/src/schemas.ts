@@ -84,3 +84,27 @@ export const MetaFinanceiraSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 export type MetaFinanceira = z.infer<typeof MetaFinanceiraSchema>;
+
+// ─── Auth Schemas ────────────────────────────────────────────────────────────
+
+export const RegisterSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Nome é obrigatório")
+    .max(200, "Nome deve ter no máximo 200 caracteres"),
+  email: z
+    .string()
+    .email("Email inválido")
+    .max(255, "Email deve ter no máximo 255 caracteres"),
+  password: z
+    .string()
+    .min(8, "Senha deve ter no mínimo 8 caracteres")
+    .max(128, "Senha deve ter no máximo 128 caracteres"),
+});
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+
+export const LoginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
+});
+export type LoginInput = z.infer<typeof LoginSchema>;
