@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { calcularAjuste, formatarAjuste } from "./ajuste";
+import { describe, it, expect, vi } from "vitest";
+import { calcularAjuste, formatarAjuste, contasAReceberDaFonte } from "./ajuste";
 import { statusEfetivo, estaVinculada } from "./status";
 import { CriarRecebimentoSchema } from "@fluxomed/shared";
 
@@ -154,5 +154,84 @@ describe("CriarRecebimentoSchema", () => {
       observacao: "x".repeat(301),
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("contasAReceberDaFonte", () => {
+  it("deve retornar atividades REALIZADA sem recebimento da fonte correta", async () => {
+    const mockAtividades = [
+      { id: "a1", status: "REALIZADA", fonteDeRendaId: "fonte1" },
+      { id: "a2", status: "REALIZADA", fonteDeRendaId: "fonte1" },
+    ];
+    const mockPrisma = {
+      atividade: {
+        findMany: vi.fn().mockResolvedValue(mockAtividades),
+      },
+    };
+
+    const result = await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+
+    expect(mockPrisma.atividade.findMany).toHaveBeenCalledWith({
+      where: {
+        userId: "user1",
+        fonteDeRendaId: "fonte1",
+        status: "REALIZADA",
+        recebimentos: { none: {} },
+      },
+      orderBy: { data: "asc" },
+    });
+    expect(result).toEqual(mockAtividades);
+  });
+
+  it("deve excluir atividades AGENDADA", async () => {
+    const mockPrisma = {
+      atividade: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+
+    const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
+    expect(callArgs.where.status).toBe("REALIZADA");
+  });
+
+  it("deve excluir atividades CANCELADA", async () => {
+    const mockPrisma = {
+      atividade: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+
+    const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
+    expect(callArgs.where.status).toBe("REALIZADA");
+  });
+
+  it("deve excluir atividades já recebidas (com recebimento vinculado)", async () => {
+    const mockPrisma = {
+      atividade: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+
+    const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
+    expect(callArgs.where.recebimentos).toEqual({ none: {} });
+  });
+
+  it("deve excluir atividades de outras fontes", async () => {
+    const mockPrisma = {
+      atividade: {
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    await contasAReceberDaFonte(mockPrisma, "fonte1", "user1");
+
+    const callArgs = mockPrisma.atividade.findMany.mock.calls[0][0];
+    expect(callArgs.where.fonteDeRendaId).toBe("fonte1");
   });
 });
