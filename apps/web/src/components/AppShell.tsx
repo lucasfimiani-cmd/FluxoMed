@@ -22,6 +22,12 @@ export default async function AppShell({
           </Link>
           <nav className="flex gap-4 text-sm">
             <Link
+              href="/app"
+              className="text-zinc-500 hover:text-zinc-900"
+            >
+              Dashboard
+            </Link>
+            <Link
               href="/app/perfis"
               className="text-zinc-500 hover:text-zinc-900"
             >
