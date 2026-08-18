@@ -37,12 +37,17 @@ export default async function RecebimentosPage(props: {
   });
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/recebimentos">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Recebimentos</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Recebimentos</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            {recebimentos.length} recebimento{recebimentos.length !== 1 ? "s" : ""} registrado{recebimentos.length !== 1 ? "s" : ""}
+          </p>
+        </div>
         <Link
           href="/app/recebimentos/novo"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
         >
           Novo Recebimento
         </Link>
@@ -55,8 +60,14 @@ export default async function RecebimentosPage(props: {
       )}
 
       {recebimentos.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
-          Nenhum recebimento registrado.
+        <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-zinc-400">Nenhum recebimento registrado.</p>
+          <Link
+            href="/app/recebimentos/novo"
+            className="mt-3 inline-block text-sm font-medium text-brand-600 hover:text-brand-700"
+          >
+            Registrar primeiro recebimento
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">
@@ -73,12 +84,12 @@ export default async function RecebimentosPage(props: {
               <Link
                 key={rec.id}
                 href={`/app/recebimentos/${rec.id}`}
-                className="block rounded-lg border border-zinc-200 bg-white p-4 hover:border-emerald-300"
+                className="block rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="font-medium">{rec.fonteDeRenda.nome}</p>
-                    <p className="text-sm text-zinc-500">
+                    <p className="font-medium text-zinc-800">{rec.fonteDeRenda.nome}</p>
+                    <p className="mt-0.5 text-sm text-zinc-500">
                       {formatarData(rec.data)} &middot;{" "}
                       {rec.atividades.length} atividade
                       {rec.atividades.length !== 1 ? "s" : ""} vinculada
@@ -86,7 +97,7 @@ export default async function RecebimentosPage(props: {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">
+                    <p className="font-semibold text-zinc-800">
                       {formatarValor(rec.valor)}
                     </p>
                     <p

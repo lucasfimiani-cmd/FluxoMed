@@ -20,7 +20,7 @@ export default async function NovoRecebimentoPage(props: {
   const hoje = new Date().toISOString().split("T")[0];
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/recebimentos">
       <h1 className="mb-6 text-2xl font-bold">Novo Recebimento</h1>
 
       {searchParams?.error && (
@@ -30,12 +30,14 @@ export default async function NovoRecebimentoPage(props: {
       )}
 
       {fontes.length === 0 ? (
-        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
-          Você precisa ter uma{" "}
-          <Link href="/app/fontes/novo" className="text-emerald-600 underline">
-            Fonte de Renda
-          </Link>{" "}
-          para registrar um recebimento.
+        <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-zinc-400">
+            Você precisa ter uma{" "}
+            <Link href="/app/fontes/novo" className="text-emerald-600 underline">
+              Fonte de Renda
+            </Link>{" "}
+            para registrar um recebimento.
+          </p>
         </div>
       ) : (
         <RecebimentoForm fontes={fontes} hoje={hoje} />
@@ -54,10 +56,7 @@ function RecebimentoForm({
   return (
     <form action={criarRecebimento} className="max-w-md space-y-4">
       <div>
-        <label
-          htmlFor="fonteDeRendaId"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="fonteDeRendaId" className="mb-1 block text-sm font-medium">
           Fonte de Renda
         </label>
         <select

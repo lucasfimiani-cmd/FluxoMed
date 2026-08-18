@@ -37,7 +37,7 @@ export default async function EditarAtividadePage(props: {
   const dataStr = atividade.data.toISOString().split("T")[0];
 
   return (
-    <AppShell>
+    <AppShell currentPath="/app/atividades">
       <h1 className="mb-6 text-2xl font-bold">Editar Atividade</h1>
 
       {sp?.error && (
@@ -93,10 +93,7 @@ function AtividadeForm({
       </div>
 
       <div>
-        <label
-          htmlFor="fonteDeRendaId"
-          className="mb-1 block text-sm font-medium"
-        >
+        <label htmlFor="fonteDeRendaId" className="mb-1 block text-sm font-medium">
           Fonte de Renda
         </label>
         <select
