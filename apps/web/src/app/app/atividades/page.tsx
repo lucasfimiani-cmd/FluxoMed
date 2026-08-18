@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { realizarAtividade, cancelarAtividade } from "@/lib/atividades/actions";
 import { rotuloTipoAtividade } from "@/lib/atividades/valor";
+import { garantirAtividadesRecorrentes } from "@/lib/atividades/recorrencia";
 
 const rotuloStatus: Record<string, { label: string; cor: string }> = {
   AGENDADA: { label: "Agendada", cor: "bg-amber-100 text-amber-700" },
@@ -63,6 +64,9 @@ export default async function AtividadesPage(props: {
 
   const inicioMes = new Date(ano, mes - 1, 1);
   const fimMes = new Date(ano, mes, 0, 23, 59, 59, 999);
+
+  // Gerar atividades recorrentes para o mês exibido (idempotente)
+  await garantirAtividadesRecorrentes(user.id, ano, mes);
 
   const atividades = await prisma.atividade.findMany({
     where: {
