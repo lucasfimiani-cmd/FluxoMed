@@ -33,6 +33,12 @@ export default async function AppShell({
             >
               Fontes de Renda
             </Link>
+            <Link
+              href="/app/atividades"
+              className="text-zinc-500 hover:text-zinc-900"
+            >
+              Atividades
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
