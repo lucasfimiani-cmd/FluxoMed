@@ -84,6 +84,7 @@ export default async function DashboardPage({
 
   return (
     <AppShell>
+      <h1 className="mb-6 text-2xl font-bold">Dashboard</h1>
       {/* Navegação de meses */}
       <div className="mb-6 flex items-center justify-between">
         <Link
@@ -92,7 +93,7 @@ export default async function DashboardPage({
         >
           ‹
         </Link>
-        <h1 className="text-xl font-bold">{nomeMes(mes)}</h1>
+        <span className="text-xl font-bold">{nomeMes(mes)}</span>
         <Link
           href={`/app?mes=${mesSeguinte(mes)}`}
           className="rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium hover:bg-zinc-200"
