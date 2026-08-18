@@ -61,11 +61,20 @@ export const EditarPerfilFiscalSchema = z
   );
 export type EditarPerfilFiscalInput = z.infer<typeof EditarPerfilFiscalSchema>;
 
-export const TipoRemuneracao = z.enum([
+export const ModeloRemuneracao = z.enum([
   "FIXO_MENSAL",
-  "VARIAVEL_POR_ATIVIDADE",
+  "POR_ATIVIDADE",
+  "POR_UNIDADE",
 ]);
-export type TipoRemuneracao = z.infer<typeof TipoRemuneracao>;
+export type ModeloRemuneracao = z.infer<typeof ModeloRemuneracao>;
+
+export const TipoAtividade = z.enum([
+  "PLANTAO",
+  "CONSULTA",
+  "PROCEDIMENTO",
+  "OUTRO",
+]);
+export type TipoAtividade = z.infer<typeof TipoAtividade>;
 
 export const StatusAtividade = z.enum([
   "AGENDADA",
@@ -88,12 +97,155 @@ export const PerfilFiscalSchema = z.object({
 });
 export type PerfilFiscal = z.infer<typeof PerfilFiscalSchema>;
 
+export const PrecoAtividadeSchema = z.object({
+  tipo: TipoAtividade,
+  valor: z.number().min(0, "Valor deve ser no mínimo 0"),
+});
+export type PrecoAtividade = z.infer<typeof PrecoAtividadeSchema>;
+
+// ─── Fonte de Renda Schemas ───────────────────────────────────────────────────
+
+const rotuloTipoAtividade: Record<string, string> = {
+  PLANTAO: "Plantão",
+  CONSULTA: "Consulta",
+  PROCEDIMENTO: "Procedimento",
+  OUTRO: "Outro",
+};
+
+export const CriarFonteDeRendaSchema = z
+  .object({
+    nome: z
+      .string()
+      .min(1, "Nome é obrigatório")
+      .max(100, "Nome deve ter no máximo 100 caracteres"),
+    perfilFiscalId: z.string().min(1, "Perfil fiscal é obrigatório"),
+    modelo: ModeloRemuneracao,
+    valorMensal: z.number().optional().nullable(),
+    valorPorAtividade: z.number().optional().nullable(),
+    prazoPagamentoDias: z
+      .number()
+      .int("Prazo deve ser um número inteiro")
+      .min(0, "Prazo deve ser no mínimo 0 dias")
+      .max(365, "Prazo deve ser no máximo 365 dias"),
+    precos: z.array(PrecoAtividadeSchema).optional().default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.modelo === "FIXO_MENSAL") {
+      if (!data.valorMensal || data.valorMensal <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Valor mensal é obrigatório para modelo Fixo Mensal",
+          path: ["valorMensal"],
+        });
+      }
+      if (data.valorPorAtividade) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Valor por atividade não se aplica ao modelo Fixo Mensal",
+          path: ["valorPorAtividade"],
+        });
+      }
+      if (data.precos && data.precos.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tabela de preços não se aplica ao modelo Fixo Mensal",
+          path: ["precos"],
+        });
+      }
+    }
+
+    if (data.modelo === "POR_ATIVIDADE") {
+      if (!data.valorPorAtividade || data.valorPorAtividade <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Valor por atividade é obrigatório para modelo Por Atividade",
+          path: ["valorPorAtividade"],
+        });
+      }
+      if (data.valorMensal) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Valor mensal não se aplica ao modelo Por Atividade",
+          path: ["valorMensal"],
+        });
+      }
+      if (data.precos && data.precos.length > 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Tabela de preços não se aplica ao modelo Por Atividade",
+          path: ["precos"],
+        });
+      }
+    }
+
+    if (data.modelo === "POR_UNIDADE") {
+      if (!data.precos || data.precos.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Tabela de preços é obrigatória para modelo Por Unidade (pelo menos um tipo)",
+          path: ["precos"],
+        });
+      }
+      if (data.valorMensal) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Valor mensal não se aplica ao modelo Por Unidade",
+          path: ["valorMensal"],
+        });
+      }
+      if (data.valorPorAtividade) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Valor por atividade não se aplica ao modelo Por Unidade",
+          path: ["valorPorAtividade"],
+        });
+      }
+
+      // Validar valores positivos e tipos únicos
+      if (data.precos) {
+        const tiposVistos = new Set<string>();
+        for (let i = 0; i < data.precos.length; i++) {
+          const p = data.precos[i];
+          if (p.valor <= 0) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Valor para ${rotuloTipoAtividade[p.tipo] ?? p.tipo} deve ser maior que zero`,
+              path: ["precos", i, "valor"],
+            });
+          }
+          if (tiposVistos.has(p.tipo)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Tipo ${rotuloTipoAtividade[p.tipo] ?? p.tipo} duplicado na tabela de preços`,
+              path: ["precos", i, "tipo"],
+            });
+          }
+          tiposVistos.add(p.tipo);
+        }
+      }
+    }
+  });
+export type CriarFonteDeRendaInput = z.infer<typeof CriarFonteDeRendaSchema>;
+
+export const EditarFonteDeRendaSchema = CriarFonteDeRendaSchema;
+export type EditarFonteDeRendaInput = z.infer<typeof EditarFonteDeRendaSchema>;
+
 export const FonteDeRendaSchema = z.object({
-  id: z.string().uuid(),
-  perfilFiscalId: z.string().uuid(),
-  nome: z.string().min(1).max(200),
-  tipoRemuneracao: TipoRemuneracao,
-  prazoPagamentoDias: z.number().int().min(0),
+  id: z.string(),
+  userId: z.string(),
+  perfilFiscalId: z.string(),
+  nome: z.string().min(1).max(100),
+  modelo: ModeloRemuneracao,
+  valorMensal: z.number().nullable().optional(),
+  valorPorAtividade: z.number().nullable().optional(),
+  prazoPagamentoDias: z.number().int().min(0).max(365),
+  ativa: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

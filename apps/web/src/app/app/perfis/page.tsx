@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Prisma } from "@prisma/client";
 
 const rotuloTipo: Record<string, string> = {
   PF: "Pessoa Física",
@@ -15,7 +16,10 @@ const rotuloRegime: Record<string, string> = {
   LUCRO_PRESUMIDO: "Lucro Presumido",
 };
 
-export default async function PerfisPage() {
+export default async function PerfisPage(props: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
@@ -35,6 +39,12 @@ export default async function PerfisPage() {
           Novo Perfil
         </Link>
       </div>
+
+      {searchParams?.error && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {searchParams.error}
+        </div>
+      )}
 
       {perfis.length === 0 ? (
         <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-zinc-400">
@@ -73,7 +83,7 @@ export default async function PerfisPage() {
   );
 }
 
-async function deleteAction(formData: FormData) {
+async function deleteAction(formData: FormData): Promise<void> {
   "use server";
   const id = formData.get("id") as string;
   const user = await getSessionUser();
@@ -82,7 +92,20 @@ async function deleteAction(formData: FormData) {
   const perfil = await prisma.perfilFiscal.findUnique({ where: { id } });
   if (!perfil || perfil.userId !== user.id) redirect("/app/perfis");
 
-  await prisma.perfilFiscal.delete({ where: { id } });
+  try {
+    await prisma.perfilFiscal.delete({ where: { id } });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003" // Foreign key constraint violation
+    ) {
+      const msg = encodeURIComponent(
+        "Este Perfil Fiscal tem Fontes de Renda vinculadas e não pode ser excluído"
+      );
+      redirect(`/app/perfis?error=${msg}`);
+    }
+    throw error;
+  }
   redirect("/app/perfis");
 }
 
