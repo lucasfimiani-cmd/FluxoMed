@@ -1,0 +1,24 @@
+# =============================================================================
+# docker-compose.cliente.yml — Template por cliente FluxoMed
+# Uso:
+#   cp docker-compose.cliente.yml docker-compose.<cliente>.yml
+#   Ajuste CLIENTE, AUTH_SECRET e porta se necessário.
+#   docker compose -f docker-compose.<cliente>.yml up -d
+# =============================================================================
+
+services:
+  app:
+    image: fluxomed:latest
+    container_name: fluxomed-${CLIENTE}
+    restart: unless-stopped
+    ports:
+      - "${PORTA}:3000"
+    environment:
+      - DATABASE_PATH=/data/${CLIENTE}.db
+      - AUTH_SECRET=${AUTH_SECRET}
+      - NODE_ENV=production
+    volumes:
+      - fluxomed-${CLIENTE}-data:/data
+
+volumes:
+  fluxomed-${CLIENTE}-data:

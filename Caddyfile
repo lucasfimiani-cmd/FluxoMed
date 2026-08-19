@@ -1,0 +1,18 @@
+# =============================================================================
+# Caddyfile — FluxoMed
+# Adicione uma entrada por cliente no formato abaixo e recarregue:
+#   caddy reload
+# =============================================================================
+
+# Exemplo para um cliente:
+# clinica-abc.fluxomed.com {
+#     reverse_proxy localhost:3001
+# }
+#
+# clinica-xyz.fluxomed.com {
+#     reverse_proxy localhost:3002
+# }
+
+# O wildcard DNS *.fluxomed.com deve apontar para o IP da VM.
+# O TLS (Let's Encrypt) é automático — o Caddy obtém e renova certificados
+# para cada subdomínio na primeira requisição.
