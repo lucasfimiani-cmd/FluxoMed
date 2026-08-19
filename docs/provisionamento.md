@@ -59,14 +59,24 @@ docker ps --filter name=fluxomed-clinica-abc
 docker logs fluxomed-clinica-abc
 ```
 
-### 6. Configure o banco de dados
+### 6. Aplique as migrations do banco de dados
 
-A primeira execução do app cria as tabelas automaticamente via Prisma.
-Se precisar rodar migrations manualmente:
+A imagem Docker contém o schema e as migrations do Prisma, mas as tabelas
+**não são criadas automaticamente** na primeira execução. É obrigatório
+aplicar as migrations explicitamente:
 
 ```bash
 docker exec fluxomed-clinica-abc npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
 ```
+
+Esse comando:
+- Usa o CLI do Prisma incluído na imagem (`node_modules/prisma`)
+- Lê o schema em `apps/web/prisma/schema.prisma`
+- Aplica as migrations pendentes em `apps/web/prisma/migrations/`
+- Cria o arquivo SQLite em `/data/clinica-abc.db` (definido por `DATABASE_PATH`)
+
+> A aplicação **não inicializa** sem as migrations aplicadas — o Prisma
+> retornará erro ao tentar consultar tabelas inexistentes.
 
 ### 7. Adicione a entrada no Caddyfile
 

@@ -48,6 +48,15 @@ COPY --from=build --chown=nextjs:nodejs \
 COPY --from=build --chown=nextjs:nodejs \
   /app/apps/web/.next/static ./apps/web/.next/static
 
+# ─── Prisma: engine + CLI + migrations ───────────────────────────────────────
+# O standalone traça o engine nativo (.prisma/client), mas a CLI (prisma)
+# e suas dependências transitivas não são incluídas. Copiamos node_modules
+# do build para garantir que prisma migrate deploy funcione em produção.
+COPY --from=build --chown=nextjs:nodejs \
+  /app/node_modules ./node_modules
+COPY --from=build --chown=nextjs:nodejs \
+  /app/apps/web/prisma ./apps/web/prisma
+
 # Diretório para o banco SQLite (montado como volume)
 RUN mkdir -p /data && chown nextjs:nodejs /data
 
